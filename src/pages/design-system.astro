@@ -1,0 +1,227 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import Heading from "@components/Heading.astro";
+import Divider from "@components/Divider.astro";
+import Button from "@components/Button.astro";
+import Badge from "@components/Badge.astro";
+import Card from "@components/Card.astro";
+import Alert from "@components/Alert.astro";
+import Tabs from "@components/Tabs.astro";
+import Tab from "@components/Tab.astro";
+import LinkComponent from "@components/Link.astro";
+import Code from "@components/Code.astro";
+import ThemeToggle from "@components/ThemeToggle.astro";
+
+const colorSwatches = [
+  { name: "bg", class: "bg-bg" },
+  { name: "surface", class: "bg-surface" },
+  { name: "border", class: "bg-border" },
+  { name: "ink", class: "bg-ink" },
+  { name: "muted", class: "bg-muted" },
+  { name: "primary", class: "bg-primary" },
+  { name: "primary-hover", class: "bg-primary-hover" },
+  { name: "accent", class: "bg-accent" },
+  { name: "success", class: "bg-success" },
+  { name: "success-fill", class: "bg-success-fill" },
+  { name: "warning", class: "bg-warning" },
+  { name: "warning-fill", class: "bg-warning-fill" },
+  { name: "danger", class: "bg-danger" },
+  { name: "danger-fill", class: "bg-danger-fill" },
+];
+
+const typeScale = [
+  { name: "text-xs", sample: "Caatinga deploy --network testnet" },
+  { name: "text-sm", sample: "Caatinga deploy --network testnet" },
+  { name: "text-base", sample: "Caatinga deploy --network testnet" },
+  { name: "text-lg", sample: "Caatinga deploy --network testnet" },
+  { name: "text-xl", sample: "Caatinga deploy --network testnet" },
+  { name: "text-2xl", sample: "Deployment orchestration" },
+  { name: "text-3xl", sample: "Deployment orchestration" },
+  { name: "text-4xl", sample: "Deployment orchestration" },
+];
+
+const radii = [
+  { name: "radius-sm", class: "rounded-sm" },
+  { name: "radius-md", class: "rounded-md" },
+  { name: "radius-lg", class: "rounded-lg" },
+  { name: "radius-full", class: "rounded-full" },
+];
+
+const shadows = [
+  { name: "shadow-sm", class: "shadow-sm" },
+  { name: "shadow-md", class: "shadow-md" },
+  { name: "shadow-lg", class: "shadow-lg" },
+];
+---
+
+<Layout title="Design System">
+  <Container size="lg">
+    <div class="flex items-center justify-between py-12">
+      <div>
+        <Heading level={1}>Design System</Heading>
+        <p class="mt-2 text-muted">
+          Tokens and base components for Caatinga Docs 2.0 — <Code>Sprint 2</Code>.
+        </p>
+      </div>
+      <ThemeToggle />
+    </div>
+
+    <section class="flex flex-col gap-6 pb-16">
+      <Heading level={2}>Color</Heading>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-7">
+        {
+          colorSwatches.map((swatch) => (
+            <div class="flex flex-col gap-2">
+              <div class:list={["h-16 rounded-md border border-border", swatch.class]} />
+              <code class="text-xs text-muted">{swatch.name}</code>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Typography</Heading>
+      <p class="text-muted">
+        Inter Variable for UI and prose, JetBrains Mono Variable for anything technical — flags,
+        paths, hashes, code.
+      </p>
+      <div class="flex flex-col gap-4">
+        {
+          typeScale.map((step) => (
+            <div class="flex items-baseline gap-4 border-b border-border pb-3">
+              <code class="w-24 shrink-0 text-xs text-muted">{step.name}</code>
+              <p class:list={[step.name, "font-semibold text-ink"]}>{step.sample}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Radius & Shadow</Heading>
+      <div class="flex flex-wrap gap-6">
+        {
+          radii.map((radius) => (
+            <div class="flex flex-col items-center gap-2">
+              <div class:list={["size-16 border border-border bg-surface", radius.class]} />
+              <code class="text-xs text-muted">{radius.name}</code>
+            </div>
+          ))
+        }
+      </div>
+      <div class="flex flex-wrap gap-8 pt-4">
+        {
+          shadows.map((shadow) => (
+            <div class="flex flex-col items-center gap-3">
+              <div class:list={["size-16 rounded-md bg-surface", shadow.class]} />
+              <code class="text-xs text-muted">{shadow.name}</code>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Button</Heading>
+      <div class="flex flex-wrap items-center gap-3">
+        <Button variant="primary">Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="ghost">Ghost</Button>
+        <Button variant="primary" size="sm"> Primary sm </Button>
+        <Button variant="primary" disabled> Disabled </Button>
+        <Button variant="primary" href="/docs"> As link </Button>
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Badge</Heading>
+      <div class="flex flex-wrap items-center gap-3">
+        <Badge>Default</Badge>
+        <Badge variant="primary">Primary</Badge>
+        <Badge variant="accent">Accent</Badge>
+        <Badge variant="success">Success</Badge>
+        <Badge variant="warning">Warning</Badge>
+        <Badge variant="danger">Danger</Badge>
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Card</Heading>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <Heading level={4}>Static card</Heading>
+          <p class="mt-2 text-sm text-muted">A plain container — border, surface, no link.</p>
+        </Card>
+        <Card href="/docs">
+          <Heading level={4}>Linked card</Heading>
+          <p class="mt-2 text-sm text-muted">Renders as an anchor; border highlights on hover.</p>
+        </Card>
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Alert</Heading>
+      <div class="flex flex-col gap-4">
+        <Alert variant="info" title="Heads up">
+          <p>Documentation 2.0 is under construction — content lands sprint by sprint.</p>
+        </Alert>
+        <Alert variant="success" title="Deploy succeeded">
+          <p>Contract deployed to testnet and artifact recorded.</p>
+        </Alert>
+        <Alert variant="warning" title="Stale bindings">
+          <p>Generated bindings don't match the current contract WASM hash.</p>
+        </Alert>
+        <Alert variant="danger" title="Deploy failed">
+          <p>Stellar CLI exited with a non-zero status. Run <Code>caatinga doctor</Code>.</p>
+        </Alert>
+      </div>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Tabs</Heading>
+      <Tabs>
+        <Tab label="npm">
+          <Code block>npx caatinga init my-dapp</Code>
+        </Tab>
+        <Tab label="pnpm">
+          <Code block>pnpm dlx caatinga init my-dapp</Code>
+        </Tab>
+        <Tab label="yarn">
+          <Code block>yarn dlx caatinga init my-dapp</Code>
+        </Tab>
+      </Tabs>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Link & Code</Heading>
+      <p class="text-ink">
+        Internal link to <LinkComponent href="/docs">the docs index</LinkComponent>, external link
+        to <LinkComponent href="https://github.com/Dione-b/caatinga">GitHub</LinkComponent>.
+      </p>
+      <p class="text-ink">
+        Inline code like <Code>caatinga.config.ts</Code> reads naturally in a sentence.
+      </p>
+      <Code block>{`caatinga deploy --network testnet --source alice`}</Code>
+    </section>
+
+    <div class="pb-24"></div>
+  </Container>
+</Layout>

@@ -1,0 +1,62 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props as Props;
+---
+
+<div class:list={["tabs", className]} data-tabs>
+  <div class="tabs-list flex gap-1 border-b border-border" role="tablist"></div>
+  <div class="tabs-panels mt-4">
+    <slot />
+  </div>
+</div>
+
+<script>
+  function initTabs(root: HTMLElement) {
+    if (root.dataset.tabsInit) return;
+    root.dataset.tabsInit = "true";
+
+    const list = root.querySelector<HTMLElement>(".tabs-list");
+    const panels = Array.from(root.querySelectorAll<HTMLElement>(".tabs-panel"));
+    if (!list || panels.length === 0) return;
+
+    const buttons = panels.map((panel, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("role", "tab");
+      button.textContent = panel.dataset.label ?? `Tab ${index + 1}`;
+      button.className =
+        "border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink aria-selected:border-primary aria-selected:text-ink";
+      button.setAttribute("aria-selected", String(index === 0));
+      button.tabIndex = index === 0 ? 0 : -1;
+      list.appendChild(button);
+      return button;
+    });
+
+    function activate(index: number) {
+      buttons.forEach((button, i) => {
+        const active = i === index;
+        button.setAttribute("aria-selected", String(active));
+        button.tabIndex = active ? 0 : -1;
+        panels[i].hidden = !active;
+      });
+      buttons[index].focus();
+    }
+
+    buttons.forEach((button, index) => {
+      button.addEventListener("click", () => activate(index));
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight") activate((index + 1) % buttons.length);
+        if (event.key === "ArrowLeft") activate((index - 1 + buttons.length) % buttons.length);
+        if (event.key === "Home") activate(0);
+        if (event.key === "End") activate(buttons.length - 1);
+      });
+    });
+
+    panels[0].hidden = false;
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-tabs]").forEach(initTabs);
+</script>

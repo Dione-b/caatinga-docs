@@ -1,1 +1,16 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+@import "./tokens.css";
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+}

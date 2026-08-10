@@ -1,0 +1,52 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  variant?: "info" | "success" | "warning" | "danger";
+  title?: string;
+  class?: string;
+}
+
+const { variant = "info", title, class: className } = Astro.props as Props;
+
+const variants: Record<
+  NonNullable<Props["variant"]>,
+  { container: string; icon: string; name: string }
+> = {
+  info: { container: "border-primary/30 bg-primary/10", icon: "text-primary", name: "lucide:info" },
+  success: {
+    container: "border-success/30 bg-success/10",
+    icon: "text-success",
+    name: "lucide:check-circle-2",
+  },
+  warning: {
+    container: "border-warning/30 bg-warning/10",
+    icon: "text-warning",
+    name: "lucide:alert-triangle",
+  },
+  danger: {
+    container: "border-danger/30 bg-danger/10",
+    icon: "text-danger",
+    name: "lucide:alert-circle",
+  },
+};
+
+const config = variants[variant];
+---
+
+<div
+  class:list={["flex gap-3 rounded-md border p-4 text-sm text-ink", config.container, className]}
+  role="note"
+>
+  <Icon
+    name={config.name}
+    class:list={["mt-0.5 size-4 shrink-0", config.icon]}
+    aria-hidden="true"
+  />
+  <div class="flex flex-col gap-1">
+    {title && <p class="font-medium text-ink">{title}</p>}
+    <div class:list={[title ? "text-muted" : "text-ink", "[&_a]:text-primary [&_a]:underline"]}>
+      <slot />
+    </div>
+  </div>
+</div>

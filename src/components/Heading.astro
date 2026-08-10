@@ -1,0 +1,22 @@
+---
+interface Props {
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  class?: string;
+}
+
+const { level = 2, class: className } = Astro.props as Props;
+const Tag = `h${level}`;
+
+const sizes: Record<NonNullable<Props["level"]>, string> = {
+  1: "text-3xl",
+  2: "text-2xl",
+  3: "text-xl",
+  4: "text-lg",
+  5: "text-base",
+  6: "text-sm",
+};
+---
+
+<Tag class:list={["font-semibold tracking-tight text-ink", sizes[level], className]}>
+  <slot />
+</Tag>

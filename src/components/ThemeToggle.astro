@@ -1,0 +1,25 @@
+---
+import { Icon } from "astro-icon/components";
+---
+
+<button
+  type="button"
+  id="theme-toggle"
+  aria-label="Toggle color theme"
+  class="inline-flex size-9 items-center justify-center rounded-md border border-border text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+>
+  <Icon name="lucide:sun" class="size-4 [[data-theme='light']_&]:hidden" aria-hidden="true" />
+  <Icon
+    name="lucide:moon"
+    class="hidden size-4 [[data-theme='light']_&]:block"
+    aria-hidden="true"
+  />
+</button>
+
+<script is:inline>
+  document.getElementById("theme-toggle")?.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("theme", next);
+  });
+</script>

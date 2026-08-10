@@ -1,0 +1,27 @@
+---
+interface Props {
+  variant?: "default" | "primary" | "accent" | "success" | "warning" | "danger";
+  class?: string;
+}
+
+const { variant = "default", class: className } = Astro.props as Props;
+
+const variants: Record<NonNullable<Props["variant"]>, string> = {
+  default: "border border-border bg-surface text-muted",
+  primary: "bg-primary text-on-primary",
+  accent: "bg-accent text-on-accent",
+  success: "bg-success-fill text-on-success-fill",
+  warning: "bg-warning-fill text-on-warning-fill",
+  danger: "bg-danger-fill text-on-danger-fill",
+};
+---
+
+<span
+  class:list={[
+    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+    variants[variant],
+    className,
+  ]}
+>
+  <slot />
+</span>

@@ -1,0 +1,20 @@
+---
+interface Props {
+  label?: string;
+  class?: string;
+}
+
+const { label, class: className } = Astro.props as Props;
+---
+
+{
+  label ? (
+    <div class:list={["flex items-center gap-3 text-xs text-muted", className]} role="separator">
+      <span class="h-px flex-1 bg-border" />
+      <span>{label}</span>
+      <span class="h-px flex-1 bg-border" />
+    </div>
+  ) : (
+    <hr class:list={["border-border", className]} />
+  )
+}

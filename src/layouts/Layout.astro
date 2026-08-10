@@ -14,15 +14,17 @@ const { title, description = "Deployment orchestration and versioned artifacts f
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      const stored = localStorage.getItem("theme");
+      document.documentElement.dataset.theme = stored === "light" ? "light" : "dark";
+    </script>
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title} · Caatinga</title>
   </head>
-  <body
-    class="min-h-screen bg-white text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100"
-  >
+  <body class="min-h-screen antialiased">
     <slot />
   </body>
 </html>

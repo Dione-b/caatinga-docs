@@ -1,0 +1,47 @@
+---
+interface Props {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md";
+  href?: string;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  class?: string;
+}
+
+const {
+  variant = "primary",
+  size = "md",
+  href,
+  type = "button",
+  disabled = false,
+  class: className,
+  ...rest
+} = Astro.props as Props;
+
+const base =
+  "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50";
+
+const variants: Record<NonNullable<Props["variant"]>, string> = {
+  primary: "bg-primary text-on-primary hover:bg-primary-hover",
+  secondary: "border border-border bg-surface text-ink hover:border-primary",
+  ghost: "text-ink hover:bg-surface",
+};
+
+const sizes: Record<NonNullable<Props["size"]>, string> = {
+  sm: "px-3 py-1.5 text-sm",
+  md: "px-4 py-2 text-sm",
+};
+
+const classes = [base, variants[variant], sizes[size], className];
+const Tag = href ? "a" : "button";
+---
+
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  disabled={href ? undefined : disabled}
+  class:list={classes}
+  {...rest}
+>
+  <slot />
+</Tag>
