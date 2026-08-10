@@ -1,0 +1,13 @@
+---
+import Alert from "@components/Alert.astro";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Note" } = Astro.props as Props;
+---
+
+<Alert variant="info" title={title}>
+  <slot />
+</Alert>

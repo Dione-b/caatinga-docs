@@ -1,0 +1,49 @@
+---
+import Heading from "@components/Heading.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props as Props;
+---
+
+<li class="step relative pb-8 pl-11 last:pb-0">
+  <Heading level={4} class="mb-2">{title}</Heading>
+  <div class="flex flex-col gap-3 text-sm text-muted">
+    <slot />
+  </div>
+</li>
+
+<style>
+  .step {
+    counter-increment: step;
+  }
+
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    height: 1.75rem;
+    width: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 1.75rem;
+    bottom: 0;
+    left: 0.875rem;
+    width: 1px;
+    background-color: var(--color-border);
+  }
+</style>

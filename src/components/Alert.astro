@@ -4,10 +4,11 @@ import { Icon } from "astro-icon/components";
 interface Props {
   variant?: "info" | "success" | "warning" | "danger";
   title?: string;
+  icon?: string;
   class?: string;
 }
 
-const { variant = "info", title, class: className } = Astro.props as Props;
+const { variant = "info", title, icon, class: className } = Astro.props as Props;
 
 const variants: Record<
   NonNullable<Props["variant"]>,
@@ -39,7 +40,7 @@ const config = variants[variant];
   role="note"
 >
   <Icon
-    name={config.name}
+    name={icon ?? config.name}
     class:list={["mt-0.5 size-4 shrink-0", config.icon]}
     aria-hidden="true"
   />

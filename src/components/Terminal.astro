@@ -1,0 +1,17 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props as Props;
+---
+
+<div class:list={["overflow-hidden rounded-md border border-border", className]}>
+  <p
+    class="border-b border-border bg-surface px-4 py-1.5 text-xs font-medium tracking-wide text-muted uppercase"
+  >
+    Terminal
+  </p>
+  <pre
+    class="overflow-x-auto bg-surface p-4 text-sm"><code class="font-mono text-ink"><slot /></code></pre>
+</div>

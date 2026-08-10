@@ -1,0 +1,17 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props as Props;
+---
+
+<ol class:list={["steps-list flex flex-col", className]}>
+  <slot />
+</ol>
+
+<style>
+  .steps-list {
+    counter-reset: step;
+  }
+</style>

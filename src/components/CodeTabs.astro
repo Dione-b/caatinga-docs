@@ -1,0 +1,37 @@
+---
+import Tabs from "@components/Tabs.astro";
+import Tab from "@components/Tab.astro";
+import Code from "@components/Code.astro";
+
+interface Props {
+  npm?: string;
+  pnpm?: string;
+  yarn?: string;
+}
+
+const { npm, pnpm, yarn } = Astro.props as Props;
+---
+
+<Tabs>
+  {
+    npm && (
+      <Tab label="npm">
+        <Code block>{npm}</Code>
+      </Tab>
+    )
+  }
+  {
+    pnpm && (
+      <Tab label="pnpm">
+        <Code block>{pnpm}</Code>
+      </Tab>
+    )
+  }
+  {
+    yarn && (
+      <Tab label="yarn">
+        <Code block>{yarn}</Code>
+      </Tab>
+    )
+  }
+</Tabs>

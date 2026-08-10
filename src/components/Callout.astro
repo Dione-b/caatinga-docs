@@ -1,0 +1,15 @@
+---
+import Alert from "@components/Alert.astro";
+
+interface Props {
+  variant?: "info" | "success" | "warning" | "danger";
+  title?: string;
+  icon?: string;
+}
+
+const { variant = "info", title, icon } = Astro.props as Props;
+---
+
+<Alert variant={variant} title={title} icon={icon}>
+  <slot />
+</Alert>

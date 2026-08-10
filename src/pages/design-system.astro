@@ -11,6 +11,16 @@ import Tabs from "@components/Tabs.astro";
 import Tab from "@components/Tab.astro";
 import LinkComponent from "@components/Link.astro";
 import Code from "@components/Code.astro";
+import Note from "@components/Note.astro";
+import Tip from "@components/Tip.astro";
+import Warning from "@components/Warning.astro";
+import Callout from "@components/Callout.astro";
+import Command from "@components/Command.astro";
+import Terminal from "@components/Terminal.astro";
+import CodeTabs from "@components/CodeTabs.astro";
+import Steps from "@components/Steps.astro";
+import Step from "@components/Step.astro";
+import Package from "@components/Package.astro";
 
 const colorSwatches = [
   { name: "bg", class: "bg-bg" },
@@ -216,6 +226,60 @@ const shadows = [
         Inline code like <Code>caatinga.config.ts</Code> reads naturally in a sentence.
       </p>
       <Code block>{`caatinga deploy --network testnet --source alice`}</Code>
+    </section>
+
+    <Divider />
+
+    <section class="flex flex-col gap-6 py-16">
+      <Heading level={2}>Documentation Components</Heading>
+      <p class="text-muted">
+        Available in every <Code>.mdx</Code> file with no import — see{" "}
+        <Code>src/lib/mdx-components.ts</Code>.
+      </p>
+
+      <div class="flex flex-col gap-4">
+        <Note>Plain informational aside — an alias for the info variant of Alert.</Note>
+        <Tip>Something the reader can act on to get a better result.</Tip>
+        <Warning>Calls out a footgun or a behavior change.</Warning>
+        <Callout variant="danger" title="Custom callout">
+          Callout forwards its variant, for cases the presets don't fit.
+        </Callout>
+      </div>
+
+      <Heading level={3} class="mt-4"> Command & Terminal </Heading>
+      <Command>caatinga doctor</Command>
+      <Terminal>
+        {
+          `$ caatinga deploy --network testnet
+Deploying contract...
+✓ Deployed: CA1234...5678`
+        }
+      </Terminal>
+
+      <Heading level={3} class="mt-4"> CodeTabs </Heading>
+      <CodeTabs
+        npm="npx caatinga init my-dapp"
+        pnpm="pnpm dlx caatinga init my-dapp"
+        yarn="yarn dlx caatinga init my-dapp"
+      />
+
+      <Heading level={3} class="mt-4"> Steps </Heading>
+      <Steps>
+        <Step title="Create the project">
+          <Code block>caatinga init my-dapp</Code>
+        </Step>
+        <Step title="Build">
+          <Code block>caatinga build</Code>
+        </Step>
+        <Step title="Deploy">
+          <Code block>caatinga deploy --network testnet</Code>
+        </Step>
+      </Steps>
+
+      <Heading level={3} class="mt-4"> Package </Heading>
+      <p class="text-ink">
+        Install <Package name="@caatinga/cli" /> and <Package name="@caatinga/client" /> to get started.
+      </p>
     </section>
 
     <div class="pb-24"></div>
