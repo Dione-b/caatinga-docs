@@ -1,0 +1,29 @@
+---
+import Layout from "@layouts/Layout.astro";
+---
+
+<Layout title="Home">
+  <main class="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-24">
+    <p class="text-sm font-medium uppercase tracking-wide text-neutral-500">Caatinga</p>
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+      Deployment orchestration<br />for Soroban.
+    </h1>
+    <p class="max-w-xl text-lg text-neutral-600 dark:text-neutral-400">
+      Build. Deploy. Version. Interact.
+    </p>
+    <div class="flex gap-4">
+      <a
+        href={`${import.meta.env.BASE_URL}docs`}
+        class="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900"
+      >
+        Get Started
+      </a>
+      <a
+        href="https://github.com/Dione-b/caatinga"
+        class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
+      >
+        GitHub
+      </a>
+    </div>
+  </main>
+</Layout>
