@@ -1,0 +1,22 @@
+{
+  "name": "@caatinga/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Documentation 2.0 for Caatinga — deployment orchestration and versioned artifacts for Soroban.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dione-b/caatinga-docs.git"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  }
+}
