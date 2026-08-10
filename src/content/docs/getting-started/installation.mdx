@@ -1,29 +1,57 @@
 ---
 title: Installation
-description: Requirements and installation instructions for the Caatinga CLI.
+description: How to install and set up Caatinga CLI in your project or globally.
 sidebar:
-  order: 2
+  order: 3
 ---
 
-<Note title="Work in progress">
-  This page is a stub from Sprint 3 — the full Getting Started section lands in Sprint 9.
-</Note>
+# Installation
 
-Install the Caatinga CLI globally, or run it directly with your package manager's dlx command.
+Caatinga can be executed directly without global installation via `npx` or installed locally within your project.
 
-## Requirements
+## Direct Execution (Recommended)
 
-- Node.js 22 or later
-- Stellar CLI installed and on your `PATH`
+You can run any Caatinga command using `npx` with the `ctg` binary:
 
-## Install the CLI
+```bash
+npx ctg --help
+```
 
-<CodeTabs
-  npm="npm install -g @caatinga/cli"
-  pnpm="pnpm add -g @caatinga/cli"
-  yarn="yarn global add @caatinga/cli"
-/>
+## Local Installation
 
-### Without a global install
+Add `@caatinga/cli` to your project's dev dependencies:
 
-Both the `caatinga` and `ctg` aliases also work through your package manager's runner, e.g. `npx caatinga doctor`.
+<Tabs>
+  <Tab label="pnpm">
+    ```bash
+    pnpm add -D @caatinga/cli
+    ```
+  </Tab>
+  <Tab label="npm">
+    ```bash
+    npm install -D @caatinga/cli
+    ```
+  </Tab>
+  <Tab label="yarn">
+    ```bash
+    yarn add -D @caatinga/cli
+    ```
+  </Tab>
+</Tabs>
+
+## Verifying Setup with Doctor
+
+Run `ctg doctor` to run system checks against your environment:
+
+```bash
+npx ctg doctor
+```
+
+Output:
+
+```text
+✓ Node.js version >= 22.0.0
+✓ Rust toolchain installed (wasm32-unknown-unknown target active)
+✓ Stellar CLI detected in PATH
+✓ Config caatinga.config.ts validated
+```

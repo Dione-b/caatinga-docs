@@ -1,0 +1,38 @@
+---
+title: Key Gotchas & Architectural Rules
+description: 25 essential rules, gotchas, and constraints for Caatinga projects.
+sidebar:
+  order: 3
+---
+
+# Key Gotchas & Architectural Rules
+
+A curated list of critical rules, boundaries, and gotchas to keep in mind when working with Caatinga.
+
+## Critical Rules
+
+1. **`--source` must be a CLI identity alias**: Always use an alias (e.g. `alice`). Never pass a public key (`G...`), secret key (`S...`), or seed phrase.
+2. **Deploy auto-generates bindings**: Pass `--no-generate` if you wish to skip binding generation during CI deploys.
+3. **Full graph deploy auto-runs `wire` + `sync-env`**: Pass `--no-wire` or `--no-sync-env` to disable post-deploy hooks and environment synchronization.
+4. **Browser invoke is single-invoker only until v1.0**: Multi-signer transactions (`signAuthEntry`) require custom application code and throw `CAATINGA_MULTI_AUTH_REQUIRED`.
+5. **ZK on mainnet is blocked by default**: Dev ceremony artifacts require `--allow-dev-ceremony` to deploy on mainnet.
+6. **Fresh machine setup**: Install Node 22+, Rust, and Stellar CLI manually, then verify with `npx ctg doctor`.
+7. **Errors are public API**: Machine-readable `CAATINGA_*` error codes must be parsed by scripts instead of parsing raw stdout/stderr text messages.
+8. **`read()` vs `invoke()`**: `read()` is a read-only simulation (no key signing, no network transaction); `invoke()` signs and submits an on-chain transaction.
+9. **Wallet adapters must reject on dismissal**: Wallet prompts should reject on user cancellation, never leaving promises pending indefinitely.
+10. **`caatinga.artifacts.json` is git-versioned**: Commit your artifacts file to version control alongside your application code.
+11. **Binding freshness is tracked automatically**: Managed via `.caatinga-bindings.json` markers (`fresh`, `stale`, `missing`, `unknown`).
+12. **`ctg doctor` deploy coverage is advisory**: Un-deployed contracts produce warnings but do not block CI exit code even with `--strict`.
+13. **Stellar CLI compatibility**: Hard floor is **23.0.0**; last tested is **27.0.0**. Newer versions output advisory warnings.
+14. **`buildRoot`**: When specified, runs a single `stellar contract build` from the Cargo workspace root rather than per-contract crate builds.
+15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
+16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
+17. **`postDeploy` expect**: Verified using the Expect DSL matchers (`equals`, `contains`, `matches`, `isArray`, `isNull`).
+18. **`frontend.env` suffixes**: Keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, and `.wasmPath` suffixes.
+19. **`doctor --strict`**: Fails on environment drift (`--strict-env`) and stale bindings (`--strict-bindings`).
+20. **`ctg regression`**: Local execution recipe mirroring CI: `test → build → deploy --if-changed → generate → smoke`.
+21. **Alias resolution**: Method arguments accept `${source.address}` or CLI identity aliases (length ≥ 3).
+22. **`identity export/import`**: Exports an encrypted base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`.
+23. **Config graph validation**: `${contracts.*.contractId}` placeholders in `deployArgs` must be declared in `dependsOn`; validated at config load time.
+24. **`ctg upgrade` vs `deploy --upgrade`**: In-place preserves `contractId` and invokes `upgrade()`; redeploy (`deploy --upgrade`) creates a new contract instance.
+25. **`read --summary` / `--quiet`**: Truncates large array payloads for clean terminal inspection on shared networks.

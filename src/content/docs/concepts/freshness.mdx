@@ -1,0 +1,43 @@
+---
+title: Binding Freshness
+description: How Caatinga tracks TypeScript binding synchronization with on-chain deployed contracts.
+sidebar:
+  order: 4
+---
+
+# Binding Freshness & Markers
+
+Caatinga tracks whether generated TypeScript client bindings are synchronized with deployed contract artifacts using a `.caatinga-bindings.json` marker file stored inside each generated binding package.
+
+## Freshness States
+
+| State | Meaning | Resolution |
+| :--- | :--- | :--- |
+| **`fresh`** | Bindings match deployed `contractId` and `wasmHash` exactly | — |
+| **`stale`** | Contract was redeployed or upgraded since last `ctg generate` | `ctg generate <name> --network <net>` |
+| **`missing`** | No TypeScript bindings exist on disk | `ctg generate` |
+| **`unknown`** | Bindings exist but predate freshness tracking markers | Regenerate once with `ctg generate` |
+
+## Freshness Marker Structure
+
+Inside `src/contracts/generated/<contract>/.caatinga-bindings.json`:
+
+```json
+{
+  "contract": "counter",
+  "network": "testnet",
+  "contractId": "C...",
+  "wasmHash": "...",
+  "generatedAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+## Status Diagnostics
+
+Run `ctg status --strict` in CI or locally to verify binding freshness across all deployed contracts:
+
+```bash
+npx ctg status --network testnet --strict
+```
+
+If any deployed contract has bindings other than `fresh`, `ctg status --strict` exits with code `1`.

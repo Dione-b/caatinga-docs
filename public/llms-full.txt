@@ -1,0 +1,825 @@
+# Caatinga — LLM Full Documentation & Reference
+> Deployment orchestration and versioned artifacts for Soroban smart contracts.
+> Generated automatically from source MDX documentation.
+
+
+---
+
+## Section: CLI Overview
+
+Path: /docs/cli/overview
+Description: Index of all Caatinga CLI commands and options.
+
+# Caatinga CLI Reference
+
+The Caatinga CLI (`@caatinga/cli`) provides commands for every stage of smart contract development, from initialization to testing and upgrades.
+
+## Command Matrix
+
+| Command | Description | Common Flags |
+| :--- | :--- | :--- |
+| **`caatinga setup`** | Interactive environment & dependency check | `--verbose` |
+| **`caatinga init`** | Scaffold new Soroban project | `<name>`, `--template` |
+| **`caatinga doctor`** | Health check of toolchain & config | None |
+| **`caatinga build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
+| **`caatinga deploy`** | Deploy WASM binaries following DAG | `--network`, `--source` |
+| **`caatinga generate`** | Generate TS client bindings | `--output` |
+| **`caatinga invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg` |
+| **`caatinga read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg` |
+| **`caatinga status`** | Display deployed contract state & network history | `--network` |
+| **`caatinga upgrade`** | Upgrade contract WASM in-place or redeploy | `--contract`, `--upgrade` |
+| **`caatinga rollback`** | Rollback contract artifacts to previous version | `--contract`, `--version` |
+| **`caatinga smoke`** | Run post-deployment smoke tests | `--network` |
+| **`caatinga ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
+
+
+---
+
+## Section: CLI Identity Reference
+
+Path: /docs/cli/identity
+Description: Stellar identity export, import, and strict security rules for --source.
+
+# CLI Identity Reference
+
+Managing signing keys and identities is critical for secure deployment pipelines. Caatinga interfaces with the Stellar CLI identity manager.
+
+
+
+## Commands
+
+### `identity export`
+
+Export a configured Stellar identity alias into an encrypted payload for CI/CD environments.
+
+```bash
+npx caatinga identity export --source alice --out alice-identity.json
+```
+
+**Flags:**
+- `--source <alias>`: Identity alias registered in Stellar CLI.
+- `--out <path>`: Destination filepath for the exported identity bundle.
+
+---
+
+### `identity import`
+
+Import a previously exported identity bundle into a local environment or CI runner.
+
+```bash
+npx caatinga identity import --in alice-identity.json
+```
+
+**Flags:**
+- `--in <path>`: Path to the encrypted identity JSON bundle.
+
+---
+
+## Security Best Practices
+
+> **Note (warning)**: 
+  Never hardcode private keys (`S...`), seed phrases, or secret environment variables in your codebase. Always export identity aliases via Stellar CLI or rely on `identity import` in CI pipelines.
+
+
+---
+
+## Section: Client API (@caatinga/client)
+
+Path: /docs/client/caatinga-client
+Description: Complete reference for createCaatingaClient, wallet adapters, and React hooks.
+
+# Client API (`@caatinga/client`)
+
+The `@caatinga/client` package provides a browser-safe, strongly-typed interface for interacting with deployed Soroban contracts and wallet sessions.
+
+## 1. Client Initialization
+
+```typescript
+import { createCaatingaClient } from "@caatinga/client";
+import * as Counter from "./contracts/generated/counter";
+import artifacts from "../caatinga.artifacts.json";
+
+const client = createCaatingaClient({
+  network: {
+    name: "testnet",
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    networkPassphrase: "Test SDF Network ; September 2015",
+  },
+  artifacts,
+  wallet: myWalletAdapter,
+  contracts: {
+    counter: {
+      binding: Counter,
+    },
+  },
+  walletTimeout: 30_000,
+});
+```
+
+## 2. Invocation Methods
+
+### `read<T>(method, args?)`
+Read-only call. Simulates execution and returns the parsed value directly without requiring transaction signing.
+
+```typescript
+const count = await client.contract("counter").read<number>("get");
+```
+
+### `simulate<T>(method, options?)`
+Simulates execution and returns the raw simulation result payload (including cost, events, and raw XDR).
+
+```typescript
+const sim = await client.contract("counter").simulate<number>("get", { debugRaw: true });
+```
+
+### `invoke<T>(method, args?, options?)`
+Signs and submits a state-changing transaction via the connected wallet adapter.
+
+```typescript
+const result = await client.contract("counter").invoke<number>("increment");
+// Returns { status, contractId, transactionHash, result? }
+```
+
+### `buildXdr(method, args?)`
+Builds and prepares the unsigned/prepared XDR transaction payload without signing or submitting to the network.
+
+```typescript
+const tx = await client.contract("counter").buildXdr("increment");
+// Returns { unsignedXdr, preparedXdr }
+```
+
+---
+
+## 3. Wallet Session & React Integration
+
+### Framework-Agnostic Session
+
+```typescript
+import { createWalletSession } from "@caatinga/client";
+
+const session = createWalletSession(adapter, { persist: true });
+session.subscribe(() => render(session.getState()));
+await session.connect();
+await session.restore(); // Silent reconnect on page load
+```
+
+### React Hooks (`@caatinga/client/react`)
+
+```tsx
+import { WalletProvider, useWallet } from "@caatinga/client/react";
+
+function App() {
+  return (
+    <WalletProvider adapter={myWalletAdapter} options={{ persist: true }}>
+      <CounterComponent />
+    </WalletProvider>
+  );
+}
+
+function CounterComponent() {
+  const { publicKey, connected, connect, disconnect } = useWallet();
+
+  return (
+    <div>
+      {connected ? (
+        <button onClick={disconnect}>Connected: {publicKey}</button>
+      ) : (
+        <button onClick={connect}>Connect Wallet</button>
+      )}
+    </div>
+  );
+}
+```
+
+
+---
+
+## Section: Architecture & Pipeline
+
+Path: /docs/concepts/architecture
+Description: High-level overview of Caatinga's architectural layers and execution pipeline.
+
+# Architecture & Pipeline
+
+Caatinga is structured around a multi-tier pipeline designed to deliver deterministic deployments and type safety from smart contract source code to frontend client applications.
+
+## High-Level Data Flow
+
+```text
+Source (Rust)
+  │
+  ▼
+Build (WASM)
+  │
+  ▼
+Deploy (Stellar Network)
+  │
+  ▼
+Artifacts (caatinga.artifacts.json)
+  │
+  ▼
+Bindings (TypeScript Client)
+  │
+  ▼
+Application (React / Web)
+```
+
+## Architectural Pillars
+
+### 1. Configuration Layer (`caatinga.config.ts`)
+The single entry point for defining your project structure, contract crates, topological dependencies (`dependsOn`), network parameters, and post-deploy lifecycle hooks.
+
+### 2. Dependency Resolution Engine
+Before any contract is deployed, Caatinga builds a Directed Acyclic Graph (DAG) of contract dependencies. It validates that no circular dependencies exist and calculates the precise deployment order.
+
+### 3. Versioned Artifact Store (`caatinga.artifacts.json`)
+Every WASM hash, Contract ID, deployment timestamp, network ID, and upgrade history entry is persisted in a deterministic JSON schema (Schema v2).
+
+### 4. Client Bindings Engine
+Generates TypeScript interfaces, methods, and XDR decoders tailored to your deployed contracts, enabling instantaneous frontend integration without manually inspecting XDR specs.
+
+
+---
+
+## Section: Deployment Graph
+
+Path: /docs/concepts/deployment-graph
+Description: How Caatinga resolves multi-contract dependencies and topological execution order.
+
+# Deployment Graph
+
+In modern dApps, smart contracts rarely exist in isolation. A Liquidity Pool contract depends on Token contracts; a Governance Vault depends on Staking and Token contracts.
+
+Caatinga handles multi-contract dependencies natively using a **Topological Deployment Graph**.
+
+## Defining Dependencies
+
+Dependencies are declared in `caatinga.config.ts` using the `dependsOn` property:
+
+```typescript
+export default defineConfig({
+  project: { name: "defi-dapp" },
+  contracts: {
+    token: {
+      path: "contracts/token",
+    },
+    vault: {
+      path: "contracts/vault",
+      dependsOn: ["token"],
+    },
+    market: {
+      path: "contracts/market",
+      dependsOn: ["token", "vault"],
+    },
+  },
+});
+```
+
+## Graph Resolution & Order
+
+When you execute `npx caatinga deploy`, Caatinga resolves the graph:
+
+```text
+token
+  │
+  ├──────→ vault
+  │           │
+  └──────→ market
+```
+
+1. **`token`** has 0 dependencies → Deployed first. Its Contract ID is recorded.
+2. **`vault`** depends on `token` → Deployed second. Caatinga injects `token`'s deployed Contract ID into `vault`'s initialization parameters.
+3. **`market`** depends on `token` and `vault` → Deployed third once both prerequisites are confirmed on-chain.
+
+## Cycle Validation
+
+Caatinga validates the DAG during config loading. If a cycle is detected (e.g. `A` depends on `B` and `B` depends on `A`), deployment halts immediately with error code `CAATINGA_CONFIG_CYCLE_DETECTED`.
+
+
+---
+
+## Section: Upgrade Strategies
+
+Path: /docs/concepts/upgrades
+Description: In-Place vs Redeploy smart contract upgrade strategies in Caatinga.
+
+# Contract Upgrade Strategies
+
+Caatinga supports two distinct contract upgrade strategies depending on your smart contract design and administrative requirements.
+
+## Strategy Comparison
+
+| Strategy | Command | On-Chain Effect | `contractId` |
+| :--- | :--- | :--- | :--- |
+| **In-place** | `ctg upgrade my-contract --network testnet --source alice` | Auto-builds, uploads WASM, and invokes `upgrade --new_wasm_hash` on existing instance | **Preserved** |
+| **Redeploy** | `ctg deploy my-contract --upgrade --network testnet --source alice` | Deploys a new instance (`--upgrade` implies `--force` + upgrade history) | **New ID** |
+
+---
+
+## 1. In-Place Upgrade (`ctg upgrade`)
+
+In-place upgrades require the smart contract to expose an admin-gated `upgrade(new_wasm_hash)` method on-chain.
+
+```bash
+# Basic in-place upgrade
+npx ctg upgrade my-contract --network testnet --source alice
+
+# Skip when WASM is unchanged
+npx ctg upgrade my-contract --if-changed --source alice --network testnet
+
+# Skip local WASM build, refresh TS bindings
+npx ctg upgrade my-contract --source alice --no-build --generate
+```
+
+### Behavior & Artifact Rules
+- **Contract ID**: Unchanged.
+- **Artifact Update**: `caatinga.artifacts.json` records `upgradeStrategy: "in-place"` and updates history with `upgradeType: "in-place"`.
+- **Admin Security**: Requires admin `--source` registered in Stellar CLI.
+
+---
+
+## 2. Redeploy Strategy (`ctg deploy --upgrade`)
+
+For contracts without an on-chain `upgrade()` function (such as standard counter templates), redeploying creates a fresh contract instance while recording full historical provenance.
+
+```bash
+npx ctg build counter
+npx ctg deploy counter --upgrade --network testnet --source alice
+```
+
+### Behavior & Artifact Rules
+- **Contract ID**: A new Contract ID is assigned on-chain.
+- **Artifact Provenance**: The previous `contractId` is archived in `caatinga.artifacts.json` under `history[].upgradeType: "new-contract"`.
+- **Bindings**: Single-contract redeployment automatically regenerates TypeScript client bindings.
+
+
+---
+
+## Section: Binding Freshness
+
+Path: /docs/concepts/freshness
+Description: How Caatinga tracks TypeScript binding synchronization with on-chain deployed contracts.
+
+# Binding Freshness & Markers
+
+Caatinga tracks whether generated TypeScript client bindings are synchronized with deployed contract artifacts using a `.caatinga-bindings.json` marker file stored inside each generated binding package.
+
+## Freshness States
+
+| State | Meaning | Resolution |
+| :--- | :--- | :--- |
+| **`fresh`** | Bindings match deployed `contractId` and `wasmHash` exactly | — |
+| **`stale`** | Contract was redeployed or upgraded since last `ctg generate` | `ctg generate <name> --network <net>` |
+| **`missing`** | No TypeScript bindings exist on disk | `ctg generate` |
+| **`unknown`** | Bindings exist but predate freshness tracking markers | Regenerate once with `ctg generate` |
+
+## Freshness Marker Structure
+
+Inside `src/contracts/generated/<contract>/.caatinga-bindings.json`:
+
+```json
+{
+  "contract": "counter",
+  "network": "testnet",
+  "contractId": "C...",
+  "wasmHash": "...",
+  "generatedAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+## Status Diagnostics
+
+Run `ctg status --strict` in CI or locally to verify binding freshness across all deployed contracts:
+
+```bash
+npx ctg status --network testnet --strict
+```
+
+If any deployed contract has bindings other than `fresh`, `ctg status --strict` exits with code `1`.
+
+
+---
+
+## Section: Expect DSL & Assertions
+
+Path: /docs/configuration/expect-dsl
+Description: Declarative verification matchers for postDeploy, postDeployRead, smoke tests, and read --expect.
+
+# Expect DSL & Assertion Matchers
+
+Caatinga includes a declarative Expect DSL shared across `postDeploy`, `postDeployRead`, `smoke.reads`, `ctg smoke`, and `ctg read --expect`.
+
+## Assertion Forms
+
+| Form | Example | Meaning |
+| :--- | :--- | :--- |
+| **Plain string** | `"42"` or `"${source.address}"` | Exact stdout match after placeholder resolution |
+| **`reachable`** | `{ matcher: "reachable" }` | Default in smoke checks (non-empty stdout) |
+| **`equals`** | `{ matcher: "equals", value: "42" }` | Numeric or string value equality |
+| **`isArray`** | `{ matcher: "isArray" }` | Parsed JSON payload is an array |
+| **`isNull`** | `{ matcher: "isNull" }` | Output is `null` or empty |
+| **`minLength`** | `{ matcher: "minLength", value: 1 }` | Parsed JSON array length ≥ value |
+| **`maxLength`** | `{ matcher: "maxLength", value: 10 }` | Parsed JSON array length ≤ value |
+| **`contains`** | `{ matcher: "contains", value: "abc" }` | Output substring match |
+| **`matches`** | `{ matcher: "matches", value: "^C[A-Z0-9]+$" }` | Regular expression match |
+| **`jsonEquals`** | `{ matcher: "jsonEquals", value: "[1,2]" }` | Deep JSON equality |
+
+## Configuration Example
+
+```typescript
+export default defineConfig({
+  project: "my-dapp",
+  postDeployRead: [
+    {
+      contract: "counter",
+      method: "get",
+      kind: "read",
+      expect: { matcher: "equals", value: "0" },
+    },
+  ],
+  smoke: {
+    reads: [
+      {
+        contract: "token",
+        method: "name",
+        expect: { matcher: "contains", value: "Governance" },
+      },
+    ],
+  },
+});
+```
+
+
+---
+
+## Section: Introduction
+
+Path: /docs/getting-started/introduction
+Description: Overview of Caatinga, the deployment orchestrator and versioned artifact manager for Soroban.
+
+# Introduction to Caatinga
+
+**Caatinga** is a deployment orchestrator and versioned artifact manager for **Stellar Soroban** smart contracts.
+
+It bridges the gap between Rust smart contract development, automated multi-contract deployment, and frontend integration.
+
+## Why Caatinga?
+
+Developing smart contracts on Stellar Soroban involves multiple steps:
+1. Compiling Rust crates into optimized `.wasm` bytecode binaries.
+2. Managing network configurations and secret keys or identity aliases.
+3. Deploying contracts to Stellar networks (Local Sandbox, Testnet, Mainnet).
+4. Extracting deployed Contract IDs and recording WASM hashes.
+5. Generating type-safe TypeScript bindings for web applications.
+6. Invoking and testing contract functions on-chain.
+
+Without an orchestrator, developers often write custom scripts or manually copy contract IDs into `.env` files. Caatinga automates this entire pipeline into a single declarative workflow:
+
+
+  #### Step: Initialize Project
+    Run `npx caatinga init my-dapp` to scaffold a project with `caatinga.config.ts`.
+  
+  #### Step: Build Contracts
+    Compile Rust contracts using `npx caatinga build`.
+  
+  #### Step: Deploy & Graph Resolution
+    Deploy contracts in topological dependency order using `npx caatinga deploy`.
+  
+  #### Step: Generate Bindings
+    Instantly produce TypeScript client bindings via `npx caatinga generate`.
+  
+  #### Step: Invoke & Read
+    Interact with your contract state using `caatinga invoke` and `caatinga read`.
+  
+
+
+## Core Mental Model
+
+Caatinga operates on two source of truth files in your workspace:
+
+- **`caatinga.config.ts`**: Declarative configuration defining contracts, dependencies, network endpoints, and post-deploy hooks.
+- **`caatinga.artifacts.json`**: Deterministic record storing contract IDs, WASM hashes, deployment timestamps, network states, and upgrade history.
+
+> **Note (tip)**: 
+  Never edit `caatinga.artifacts.json` manually. Caatinga updates this file atomically during builds and deployments.
+
+
+Next up: Check the [Requirements](/docs/getting-started/requirements) or follow the [Installation](/docs/getting-started/installation) guide.
+
+
+---
+
+## Section: Requirements
+
+Path: /docs/getting-started/requirements
+Description: System requirements and dependencies needed to run Caatinga.
+
+# System Requirements
+
+Before using Caatinga, ensure your environment meets the prerequisites for Node.js, Rust, and the Stellar CLI.
+
+## Prerequisites
+
+| Tool | Minimum Version | Recommended | Notes |
+| :--- | :--- | :--- | :--- |
+| **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
+| **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
+| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32-unknown-unknown` |
+| **Stellar CLI** | `21.0.0+` | Latest release | Used under the hood for WASM operations |
+
+## Rust & WASM Setup
+
+Soroban smart contracts require the `wasm32-unknown-unknown` target:
+
+```bash
+rustup target add wasm32-unknown-unknown
+```
+
+Verify your installation:
+
+```bash
+rustc --version
+cargo --version
+```
+
+## Stellar CLI Installation
+
+Caatinga relies on the official `stellar` command line interface for low-level cryptographic signatures and network RPC interactions:
+
+```bash
+# macOS (Homebrew)
+brew install stellar-cli
+
+# Linux / Cargo
+cargo install --locked stellar-cli --features opt
+```
+
+<Warning>
+  Caatinga validates the presence of Stellar CLI before executing builds or deploys. Run `npx caatinga doctor` to verify your local setup.
+</Warning>
+
+
+---
+
+## Section: Installation
+
+Path: /docs/getting-started/installation
+Description: How to install and set up Caatinga CLI in your project or globally.
+
+# Installation
+
+Caatinga can be executed directly without global installation via `npx` or installed locally within your project.
+
+## Direct Execution (Recommended)
+
+You can run any Caatinga command using `npx`:
+
+```bash
+npx caatinga --help
+```
+
+## Local Installation
+
+Add `@caatinga/cli` to your project's dev dependencies:
+
+
+  #### pnpm
+    ```bash
+    pnpm add -D @caatinga/cli
+    ```
+  
+  #### npm
+    ```bash
+    npm install -D @caatinga/cli
+    ```
+  
+  #### yarn
+    ```bash
+    yarn add -D @caatinga/cli
+    ```
+  
+
+
+## Verifying Setup with Doctor
+
+Run `caatinga doctor` to run system checks against your environment:
+
+```bash
+npx caatinga doctor
+```
+
+Output:
+
+```text
+✓ Node.js version >= 22.0.0
+✓ Rust toolchain installed (wasm32-unknown-unknown target active)
+✓ Stellar CLI detected in PATH
+✓ Config caatinga.config.ts validated
+```
+
+
+---
+
+## Section: Setup & Initial Workflow
+
+Path: /docs/getting-started/setup
+Description: Quick walkthrough of initializing, building, deploying, and invoking your first Soroban dapp.
+
+# Setup & Initial Workflow
+
+This step-by-step guide walks you through the complete lifecycle of a Soroban project with Caatinga.
+
+## Step 1: Scaffold Project
+
+Initialize a new project using the default `react-vite-counter` template:
+
+```bash
+npx caatinga init my-dapp
+cd my-dapp
+npm install
+```
+
+## Step 2: Health Check
+
+Verify your toolchain and dependencies:
+
+```bash
+npx caatinga doctor
+```
+
+## Step 3: Build Smart Contracts
+
+Compile the Rust contracts in `contracts/`:
+
+```bash
+npx caatinga build
+```
+
+This compiles your contracts and generates `.wasm` binaries.
+
+## Step 4: Deploy to Testnet
+
+Deploy your contracts using your configured network and Stellar identity:
+
+```bash
+npx caatinga deploy --network testnet --source alice
+```
+
+Caatinga resolves dependencies, deploys the WASM binaries on-chain, and writes contract metadata to `caatinga.artifacts.json`.
+
+## Step 5: Generate Bindings & Invoke
+
+Generate TypeScript bindings for your frontend:
+
+```bash
+npx caatinga generate
+```
+
+Now invoke contract functions directly:
+
+```bash
+npx caatinga invoke counter increment --source alice
+```
+
+Read the updated balance/counter state:
+
+```bash
+npx caatinga read counter value
+```
+
+
+---
+
+## Section: Error Reference
+
+Path: /docs/reference/errors
+Description: Searchable public error code reference for CAATINGA_* machine-readable error codes.
+
+# Error Reference (`CAATINGA_*`)
+
+Caatinga enforces machine-readable error codes for automation, CI pipelines, and programatic CLI integration.
+
+When a command fails, Caatinga returns a structured error payload containing the error code, category, description, and resolution instructions.
+
+---
+
+## Error Catalog
+
+### `CAATINGA_CONFIG_NOT_FOUND`
+- **Category**: Configuration
+- **Description**: `caatinga.config.ts` was not found in the root directory.
+- **Common Causes**: Running commands outside a Caatinga workspace root.
+- **How to Fix**: Run `npx caatinga init` or navigate to your project root containing `caatinga.config.ts`.
+
+---
+
+### `CAATINGA_CONFIG_CYCLE_DETECTED`
+- **Category**: Dependency Graph
+- **Description**: Circular dependency detected during contract graph resolution.
+- **Common Causes**: Contract A depends on Contract B while Contract B depends on Contract A in `dependsOn`.
+- **How to Fix**: Inspect contract `dependsOn` declarations and refactor circular relationships.
+
+---
+
+### `CAATINGA_BUILD_FAILED`
+- **Category**: Compilation
+- **Description**: Cargo/rustc failed to compile contract WASM binaries.
+- **Common Causes**: Rust compilation errors, missing dependencies, or incompatible Soroban SDK versions.
+- **How to Fix**: Check the Rust compiler output in stderr and run `cargo check` inside the contract crate directory.
+
+---
+
+### `CAATINGA_DEPLOY_FAILED`
+- **Category**: Deployment
+- **Description**: Deployment failed during Stellar network execution.
+- **Common Causes**: Insufficient account balance for fees, invalid identity alias, or network RPC timeout.
+- **How to Fix**: Verify `npx caatinga doctor`, check account funds on Testnet/Mainnet, and ensure `--source` alias exists.
+
+---
+
+### `CAATINGA_SOURCE_INVALID_KEY`
+- **Category**: Security / Identity
+- **Description**: `--source` parameter contained a raw key (`G...`, `S...`) or secret phrase instead of a Stellar CLI identity alias.
+- **Common Causes**: Passing raw Stellar secret key or public key to CLI.
+- **How to Fix**: Use an identity alias (e.g. `--source alice`). See [CLI Identity Reference](/docs/cli/identity).
+
+---
+
+### `CAATINGA_ARTIFACT_NOT_FOUND`
+- **Category**: Artifacts
+- **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.
+- **Common Causes**: Attempting `caatinga invoke` or `caatinga generate` before running `caatinga deploy`.
+- **How to Fix**: Run `npx caatinga deploy --network <network>` to generate artifacts.
+
+
+---
+
+## Section: Package Reference
+
+Path: /docs/reference/packages
+Description: Complete package index for @caatinga/cli, @caatinga/core, @caatinga/client, and @caatinga/zk.
+
+# Package Reference
+
+Caatinga is published as modular TypeScript npm packages under the `@caatinga` scope.
+
+| Package | Role | Browser-safe | Install command |
+| :--- | :--- | :--- | :--- |
+| **`@caatinga/cli`** | CLI binary (`caatinga` / `ctg`) | No | `npm install -g @caatinga/cli` |
+| **`@caatinga/core`** | Config loading, artifact I/O, Stellar CLI orchestration | No (use `./browser`) | Dependency of `@caatinga/cli` |
+| **`@caatinga/core/browser`** | Errors + artifact types only (excludes Node modules) | Yes | Dependency of `@caatinga/client` |
+| **`@caatinga/client`** | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes | `npm install @caatinga/client` |
+| **`@caatinga/client/react`** | `WalletProvider` + `useWallet` (React >=18 optional peer) | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/client/vite`** | SWK bundler helpers: `walletStubViteAliases`, `walletStubOverrides` | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/client/freighter`** | Freighter wallet adapter | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/client/stellar-wallets-kit`** | Multi-wallet adapter (Freighter, xBull, etc.) | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/zk`** | ZK proof serialization, Circom Groth16 helpers | No (use `./browser`) | Dependency of `@caatinga/cli` |
+| **`@caatinga/zk/browser`** | Browser ZK binding helpers | Yes | Subpath of `@caatinga/zk` |
+
+## Release & Versioning Policy
+
+- **Dist Tags**: `latest` (v3.6.1) / `next` (v3.8.0).
+- **Status**: Alpha (pre-1.0). The `3.x` major version does **not** imply API stability yet.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.6.1`) rather than floating tags.
+- **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.
+
+
+---
+
+## Section: Key Gotchas & Architectural Rules
+
+Path: /docs/reference/gotchas
+Description: 25 essential rules, gotchas, and constraints for Caatinga projects.
+
+# Key Gotchas & Architectural Rules
+
+A curated list of critical rules, boundaries, and gotchas to keep in mind when working with Caatinga.
+
+## Critical Rules
+
+1. **`--source` must be a CLI identity alias**: Always use an alias (e.g. `alice`). Never pass a public key (`G...`), secret key (`S...`), or seed phrase.
+2. **Deploy auto-generates bindings**: Pass `--no-generate` if you wish to skip binding generation during CI deploys.
+3. **Full graph deploy auto-runs `wire` + `sync-env`**: Pass `--no-wire` or `--no-sync-env` to disable post-deploy hooks and environment synchronization.
+4. **Browser invoke is single-invoker only until v1.0**: Multi-signer transactions (`signAuthEntry`) require custom application code and throw `CAATINGA_MULTI_AUTH_REQUIRED`.
+5. **ZK on mainnet is blocked by default**: Dev ceremony artifacts require `--allow-dev-ceremony` to deploy on mainnet.
+6. **Fresh machine setup**: Install Node 22+, Rust, and Stellar CLI manually, then verify with `npx ctg doctor`.
+7. **Errors are public API**: Machine-readable `CAATINGA_*` error codes must be parsed by scripts instead of parsing raw stdout/stderr text messages.
+8. **`read()` vs `invoke()`**: `read()` is a read-only simulation (no key signing, no network transaction); `invoke()` signs and submits an on-chain transaction.
+9. **Wallet adapters must reject on dismissal**: Wallet prompts should reject on user cancellation, never leaving promises pending indefinitely.
+10. **`caatinga.artifacts.json` is git-versioned**: Commit your artifacts file to version control alongside your application code.
+11. **Binding freshness is tracked automatically**: Managed via `.caatinga-bindings.json` markers (`fresh`, `stale`, `missing`, `unknown`).
+12. **`ctg doctor` deploy coverage is advisory**: Un-deployed contracts produce warnings but do not block CI exit code even with `--strict`.
+13. **Stellar CLI compatibility**: Hard floor is **23.0.0**; last tested is **27.0.0**. Newer versions output advisory warnings.
+14. **`buildRoot`**: When specified, runs a single `stellar contract build` from the Cargo workspace root rather than per-contract crate builds.
+15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
+16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
+17. **`postDeploy` expect**: Verified using the Expect DSL matchers (`equals`, `contains`, `matches`, `isArray`, `isNull`).
+18. **`frontend.env` suffixes**: Keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, and `.wasmPath` suffixes.
+19. **`doctor --strict`**: Fails on environment drift (`--strict-env`) and stale bindings (`--strict-bindings`).
+20. **`ctg regression`**: Local execution recipe mirroring CI: `test → build → deploy --if-changed → generate → smoke`.
+21. **Alias resolution**: Method arguments accept `${source.address}` or CLI identity aliases (length ≥ 3).
+22. **`identity export/import`**: Exports an encrypted base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`.
+23. **Config graph validation**: `${contracts.*.contractId}` placeholders in `deployArgs` must be declared in `dependsOn`; validated at config load time.
+24. **`ctg upgrade` vs `deploy --upgrade`**: In-place preserves `contractId` and invokes `upgrade()`; redeploy (`deploy --upgrade`) creates a new contract instance.
+25. **`read --summary` / `--quiet`**: Truncates large array payloads for clean terminal inspection on shared networks.
+

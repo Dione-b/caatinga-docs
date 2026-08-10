@@ -1,0 +1,40 @@
+---
+title: CLI Overview
+description: Index of all Caatinga CLI commands and options.
+sidebar:
+  order: 1
+---
+
+# Caatinga CLI Reference
+
+The Caatinga CLI (`@caatinga/cli`) provides commands for every stage of smart contract development, from initialization to testing and upgrades. The binary is invoked as `ctg`.
+
+## Canonical Workflow
+
+```text
+init → doctor → build → deploy → generate → read / invoke → browser
+```
+
+Run `ctg doctor` before changing deploy state or troubleshooting the environment.
+
+## Command Matrix
+
+| Command | Description | Common Flags |
+| :--- | :--- | :--- |
+| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template` |
+| **`ctg doctor`** | Health check of toolchain & config | `--strict`, `--strict-env`, `--strict-bindings` |
+| **`ctg build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
+| **`ctg deploy`** | Deploy WASM binaries following DAG | `--network`, `--source`, `--upgrade`, `--if-changed`, `--no-generate`, `--no-wire`, `--no-sync-env` |
+| **`ctg upgrade`** | In-place WASM upgrade on existing instance | `--network`, `--source`, `--if-changed`, `--no-build`, `--generate` |
+| **`ctg wire`** | Execute `postDeploy` hooks after deployment | `--network`, `--source` |
+| **`ctg sync-env`** | Sync deployed contract IDs to `frontend.env` | `--network` |
+| **`ctg generate`** | Generate TS client bindings | `--output`, `--network` |
+| **`ctg status`** | Display deployed contract state & binding freshness | `--network`, `--strict` |
+| **`ctg invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg`, `--source` |
+| **`ctg read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg`, `--expect`, `--summary`, `--quiet` |
+| **`ctg smoke`** | Run post-deployment smoke tests | `--network` |
+| **`ctg regression`** | Local CI recipe: test → build → deploy → generate → smoke | `--network`, `--source` |
+| **`ctg ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
+| **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import` |
+| **`ctg zk`** | Circom Groth16 ZK proof helpers | `--allow-dev-ceremony` |
+

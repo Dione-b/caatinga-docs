@@ -1,0 +1,17 @@
+# Caatinga Documentation Index for LLMs
+
+- [CLI Overview](/docs/cli/overview): Index of all Caatinga CLI commands and options.
+- [CLI Identity Reference](/docs/cli/identity): Stellar identity export, import, and strict security rules for --source.
+- [Client API (@caatinga/client)](/docs/client/caatinga-client): Complete reference for createCaatingaClient, wallet adapters, and React hooks.
+- [Architecture & Pipeline](/docs/concepts/architecture): High-level overview of Caatinga's architectural layers and execution pipeline.
+- [Deployment Graph](/docs/concepts/deployment-graph): How Caatinga resolves multi-contract dependencies and topological execution order.
+- [Upgrade Strategies](/docs/concepts/upgrades): In-Place vs Redeploy smart contract upgrade strategies in Caatinga.
+- [Binding Freshness](/docs/concepts/freshness): How Caatinga tracks TypeScript binding synchronization with on-chain deployed contracts.
+- [Expect DSL & Assertions](/docs/configuration/expect-dsl): Declarative verification matchers for postDeploy, postDeployRead, smoke tests, and read --expect.
+- [Introduction](/docs/getting-started/introduction): Overview of Caatinga, the deployment orchestrator and versioned artifact manager for Soroban.
+- [Requirements](/docs/getting-started/requirements): System requirements and dependencies needed to run Caatinga.
+- [Installation](/docs/getting-started/installation): How to install and set up Caatinga CLI in your project or globally.
+- [Setup & Initial Workflow](/docs/getting-started/setup): Quick walkthrough of initializing, building, deploying, and invoking your first Soroban dapp.
+- [Error Reference](/docs/reference/errors): Searchable public error code reference for CAATINGA_* machine-readable error codes.
+- [Package Reference](/docs/reference/packages): Complete package index for @caatinga/cli, @caatinga/core, @caatinga/client, and @caatinga/zk.
+- [Key Gotchas & Architectural Rules](/docs/reference/gotchas): 25 essential rules, gotchas, and constraints for Caatinga projects.

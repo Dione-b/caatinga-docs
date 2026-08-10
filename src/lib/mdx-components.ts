@@ -6,6 +6,7 @@ import Warning from "@components/Warning.astro";
 import Callout from "@components/Callout.astro";
 import Command from "@components/Command.astro";
 import Terminal from "@components/Terminal.astro";
+import CodeBlock from "@components/CodeBlock.astro";
 import CodeTabs from "@components/CodeTabs.astro";
 import Steps from "@components/Steps.astro";
 import Step from "@components/Step.astro";
@@ -13,6 +14,7 @@ import Package from "@components/Package.astro";
 import Tabs from "@components/Tabs.astro";
 import Tab from "@components/Tab.astro";
 import Badge from "@components/Badge.astro";
+import IdentityRules from "@components/IdentityRules.astro";
 
 /**
  * Passed to <Content components={mdxComponents} /> in pages/docs/[...slug].astro.
@@ -21,13 +23,14 @@ import Badge from "@components/Badge.astro";
  */
 export const mdxComponents = {
   a: Link,
-  code: Code,
+  Code,
   Note,
   Tip,
   Warning,
   Callout,
   Command,
   Terminal,
+  CodeBlock,
   CodeTabs,
   Steps,
   Step,
@@ -35,4 +38,8 @@ export const mdxComponents = {
   Tabs,
   Tab,
   Badge,
+  IdentityRules,
 };
+
+
+

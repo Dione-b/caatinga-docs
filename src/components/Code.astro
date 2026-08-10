@@ -1,32 +1,55 @@
 ---
+import { highlightCommand } from "@/lib/shiki";
+
 interface Props {
   block?: boolean;
+  lang?: string;
   class?: string;
 }
 
-const { block = false, class: className } = Astro.props as Props;
+const { block = false, lang = "bash", class: className, ...rest } = Astro.props as Props;
+
+// If className includes astro-code/shiki, it's already rendered by Shiki inside a <pre>
+const isShikiChild = className && (className.includes("astro-code") || className.includes("shiki"));
+
+let codeText = "";
+if (block && Astro.slots.has("default")) {
+  const rendered = await Astro.slots.render("default");
+  codeText = rendered.replace(/<[^>]*>/g, "").trim();
+}
+
+const highlightedHtml = codeText ? await highlightCommand(codeText, lang) : "";
 ---
 
 {
-  block ? (
-    <pre
-      class:list={[
-        "overflow-x-auto rounded-md border border-border bg-surface p-4 text-sm",
-        className,
-      ]}
-    >
-      <code class="font-mono">
-        <slot />
-      </code>
-    </pre>
+  isShikiChild ? (
+    <code class:list={[className]} {...rest}><slot /></code>
+  ) : block ? (
+    highlightedHtml ? (
+      <div class="shiki-block my-4 rounded-lg border border-border bg-surface p-4 font-mono text-sm overflow-x-auto shadow-sm" set:html={highlightedHtml} />
+    ) : (
+      <pre class:list={["overflow-x-auto rounded-lg border border-border bg-surface p-4 font-mono text-sm shadow-sm", className]} {...rest}><code class="text-ink"><slot /></code></pre>
+    )
   ) : (
     <code
       class:list={[
-        "rounded-sm border border-border bg-surface px-1.5 py-0.5 text-[0.85em] font-mono text-ink",
+        "rounded-md border border-border bg-surface px-1.5 py-0.5 text-[0.875em] font-mono text-ink",
         className,
       ]}
+      {...rest}
     >
       <slot />
     </code>
   )
 }
+
+<style is:global>
+  .shiki-block pre.astro-code,
+  .shiki-block pre.shiki {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: var(--font-mono);
+  }
+</style>

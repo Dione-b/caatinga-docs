@@ -1,0 +1,45 @@
+---
+title: Architecture & Pipeline
+description: High-level overview of Caatinga's architectural layers and execution pipeline.
+sidebar:
+  order: 1
+---
+
+# Architecture & Pipeline
+
+Caatinga is structured around a multi-tier pipeline designed to deliver deterministic deployments and type safety from smart contract source code to frontend client applications.
+
+## High-Level Data Flow
+
+```text
+Source (Rust)
+  │
+  ▼
+Build (WASM)
+  │
+  ▼
+Deploy (Stellar Network)
+  │
+  ▼
+Artifacts (caatinga.artifacts.json)
+  │
+  ▼
+Bindings (TypeScript Client)
+  │
+  ▼
+Application (React / Web)
+```
+
+## Architectural Pillars
+
+### 1. Configuration Layer (`caatinga.config.ts`)
+The single entry point for defining your project structure, contract crates, topological dependencies (`dependsOn`), network parameters, and post-deploy lifecycle hooks.
+
+### 2. Dependency Resolution Engine
+Before any contract is deployed, Caatinga builds a Directed Acyclic Graph (DAG) of contract dependencies. It validates that no circular dependencies exist and calculates the precise deployment order.
+
+### 3. Versioned Artifact Store (`caatinga.artifacts.json`)
+Every WASM hash, Contract ID, deployment timestamp, network ID, and upgrade history entry is persisted in a deterministic JSON schema (Schema v2).
+
+### 4. Client Bindings Engine
+Generates TypeScript interfaces, methods, and XDR decoders tailored to your deployed contracts, enabling instantaneous frontend integration without manually inspecting XDR specs.

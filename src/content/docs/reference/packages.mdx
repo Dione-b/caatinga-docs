@@ -1,0 +1,30 @@
+---
+title: Package Reference
+description: Complete package index for @caatinga/cli, @caatinga/core, @caatinga/client, and @caatinga/zk.
+sidebar:
+  order: 1
+---
+
+# Package Reference
+
+Caatinga is published as modular TypeScript npm packages under the `@caatinga` scope.
+
+| Package | Role | Browser-safe | Install command |
+| :--- | :--- | :--- | :--- |
+| **`@caatinga/cli`** | CLI binary (`caatinga` / `ctg`) | No | `npm install -g @caatinga/cli` |
+| **`@caatinga/core`** | Config loading, artifact I/O, Stellar CLI orchestration | No (use `./browser`) | Dependency of `@caatinga/cli` |
+| **`@caatinga/core/browser`** | Errors + artifact types only (excludes Node modules) | Yes | Dependency of `@caatinga/client` |
+| **`@caatinga/client`** | `createCaatingaClient`, wallet session, invoke/read/simulate/buildXdr | Yes | `npm install @caatinga/client` |
+| **`@caatinga/client/react`** | `WalletProvider` + `useWallet` (React >=18 optional peer) | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/client/vite`** | SWK bundler helpers: `walletStubViteAliases`, `walletStubOverrides` | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/client/freighter`** | Freighter wallet adapter | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/client/stellar-wallets-kit`** | Multi-wallet adapter (Freighter, xBull, etc.) | Yes | Subpath of `@caatinga/client` |
+| **`@caatinga/zk`** | ZK proof serialization, Circom Groth16 helpers | No (use `./browser`) | Dependency of `@caatinga/cli` |
+| **`@caatinga/zk/browser`** | Browser ZK binding helpers | Yes | Subpath of `@caatinga/zk` |
+
+## Release & Versioning Policy
+
+- **Dist Tags**: `latest` (v3.8.0) / `next` (v3.9.1).
+- **Status**: Alpha (pre-1.0). The `3.x` major version does **not** imply API stability yet.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.8.0`) rather than floating tags.
+- **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.

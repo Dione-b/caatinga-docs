@@ -1,0 +1,55 @@
+---
+title: Upgrade Strategies
+description: In-Place vs Redeploy smart contract upgrade strategies in Caatinga.
+sidebar:
+  order: 3
+---
+
+# Contract Upgrade Strategies
+
+Caatinga supports two distinct contract upgrade strategies depending on your smart contract design and administrative requirements.
+
+## Strategy Comparison
+
+| Strategy | Command | On-Chain Effect | `contractId` |
+| :--- | :--- | :--- | :--- |
+| **In-place** | `ctg upgrade my-contract --network testnet --source alice` | Auto-builds, uploads WASM, and invokes `upgrade --new_wasm_hash` on existing instance | **Preserved** |
+| **Redeploy** | `ctg deploy my-contract --upgrade --network testnet --source alice` | Deploys a new instance (`--upgrade` implies `--force` + upgrade history) | **New ID** |
+
+---
+
+## 1. In-Place Upgrade (`ctg upgrade`)
+
+In-place upgrades require the smart contract to expose an admin-gated `upgrade(new_wasm_hash)` method on-chain.
+
+```bash
+# Basic in-place upgrade
+npx ctg upgrade my-contract --network testnet --source alice
+
+# Skip when WASM is unchanged
+npx ctg upgrade my-contract --if-changed --source alice --network testnet
+
+# Skip local WASM build, refresh TS bindings
+npx ctg upgrade my-contract --source alice --no-build --generate
+```
+
+### Behavior & Artifact Rules
+- **Contract ID**: Unchanged.
+- **Artifact Update**: `caatinga.artifacts.json` records `upgradeStrategy: "in-place"` and updates history with `upgradeType: "in-place"`.
+- **Admin Security**: Requires admin `--source` registered in Stellar CLI.
+
+---
+
+## 2. Redeploy Strategy (`ctg deploy --upgrade`)
+
+For contracts without an on-chain `upgrade()` function (such as standard counter templates), redeploying creates a fresh contract instance while recording full historical provenance.
+
+```bash
+npx ctg build counter
+npx ctg deploy counter --upgrade --network testnet --source alice
+```
+
+### Behavior & Artifact Rules
+- **Contract ID**: A new Contract ID is assigned on-chain.
+- **Artifact Provenance**: The previous `contractId` is archived in `caatinga.artifacts.json` under `history[].upgradeType: "new-contract"`.
+- **Bindings**: Single-contract redeployment automatically regenerates TypeScript client bindings.

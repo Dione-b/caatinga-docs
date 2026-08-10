@@ -1,0 +1,50 @@
+---
+title: Requirements
+description: System requirements and dependencies needed to run Caatinga.
+sidebar:
+  order: 2
+---
+
+# System Requirements
+
+Before using Caatinga, ensure your environment meets the prerequisites for Node.js, Rust, and the Stellar CLI.
+
+## Prerequisites
+
+| Tool | Minimum Version | Recommended | Notes |
+| :--- | :--- | :--- | :--- |
+| **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
+| **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
+| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32-unknown-unknown` |
+| **Stellar CLI** | `23.0.0+` | Latest release | Used under the hood for WASM operations |
+
+## Rust & WASM Setup
+
+Soroban smart contracts require the `wasm32-unknown-unknown` target:
+
+```bash
+rustup target add wasm32-unknown-unknown
+```
+
+Verify your installation:
+
+```bash
+rustc --version
+cargo --version
+```
+
+## Stellar CLI Installation
+
+Caatinga relies on the official `stellar` command line interface for low-level cryptographic signatures and network RPC interactions:
+
+```bash
+# macOS (Homebrew)
+brew install stellar-cli
+
+# Linux / Cargo
+cargo install --locked stellar-cli --features opt
+```
+
+<Warning>
+  Caatinga validates the presence of Stellar CLI before executing builds or deploys. Run `npx ctg doctor` to verify your local setup.
+</Warning>

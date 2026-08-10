@@ -18,39 +18,52 @@ function humanize(slug: string): string {
 }
 
 function entryHref(entry: CollectionEntry<"docs">): string {
-  return entry.id === "index" ? "/docs" : `/docs/${entry.id}`;
+  return `/docs/${entry.id}`;
 }
 
-/**
- * Section = first path segment. Entries with no folder (just the root
- * `index.mdx` today) are grouped into "Getting Started" until more
- * top-level sections exist to disambiguate.
- */
 function entrySection(entry: CollectionEntry<"docs">): string {
-  const [first, ...rest] = entry.id.split("/");
-  return rest.length === 0 ? "Getting Started" : humanize(first);
+  const [first] = entry.id.split("/");
+  return humanize(first);
 }
+
+const SECTION_ORDER: string[] = [
+  "Getting Started",
+  "Concepts",
+  "Configuration",
+  "Cli",
+  "Client",
+  "Reference",
+];
 
 export async function getNav(): Promise<NavSection[]> {
   const entries = await getCollection("docs");
+  const filtered = entries.filter((e) => e.id !== "index");
 
   const sections = new Map<string, CollectionEntry<"docs">[]>();
-  for (const entry of entries) {
+  for (const entry of filtered) {
     const section = entrySection(entry);
     const list = sections.get(section) ?? [];
     list.push(entry);
     sections.set(section, list);
   }
 
-  return Array.from(sections.entries()).map(([title, sectionEntries]) => ({
-    title,
-    pages: sectionEntries
-      .sort((a, b) => a.data.sidebar.order - b.data.sidebar.order)
-      .map((entry) => ({
-        title: entry.data.sidebar.label ?? entry.data.title,
-        href: entryHref(entry),
-      })),
-  }));
+  return Array.from(sections.entries())
+    .sort(([a], [b]) => {
+      const indexA = SECTION_ORDER.indexOf(a);
+      const indexB = SECTION_ORDER.indexOf(b);
+      const posA = indexA === -1 ? SECTION_ORDER.length : indexA;
+      const posB = indexB === -1 ? SECTION_ORDER.length : indexB;
+      return posA - posB;
+    })
+    .map(([title, sectionEntries]) => ({
+      title,
+      pages: sectionEntries
+        .sort((a, b) => a.data.sidebar.order - b.data.sidebar.order)
+        .map((entry) => ({
+          title: entry.data.sidebar.label ?? entry.data.title,
+          href: entryHref(entry),
+        })),
+    }));
 }
 
 export async function getFlatNav(): Promise<NavPage[]> {
@@ -58,11 +71,6 @@ export async function getFlatNav(): Promise<NavPage[]> {
   return sections.flatMap((section) => section.pages);
 }
 
-/**
- * Astro.url.pathname includes the configured `base` (e.g. "/caatinga-docs/…"),
- * while nav hrefs are base-agnostic ("/docs/…"). Strip the base before
- * comparing the two.
- */
 export function normalizePath(pathname: string): string {
   const base = import.meta.env.BASE_URL;
   const withoutBase =
@@ -77,7 +85,9 @@ export interface Breadcrumb {
 
 export async function getBreadcrumb(pathname: string): Promise<Breadcrumb[]> {
   const current = normalizePath(pathname);
-  const trail: Breadcrumb[] = [{ title: "Docs", href: "/docs" }];
+  const trail: Breadcrumb[] = [
+    { title: "Docs", href: "/docs/getting-started/introduction" },
+  ];
   const sections = await getNav();
 
   for (const section of sections) {

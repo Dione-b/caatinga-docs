@@ -1,0 +1,47 @@
+---
+title: CLI Identity Reference
+description: Stellar identity export, import, and strict security rules for --source.
+sidebar:
+  order: 2
+---
+
+# CLI Identity Reference
+
+Managing signing keys and identities is critical for secure deployment pipelines. Caatinga interfaces with the Stellar CLI identity manager.
+
+<IdentityRules />
+
+## Commands
+
+### `identity export`
+
+Export a configured Stellar identity alias into an encrypted payload for CI/CD environments.
+
+```bash
+npx ctg identity export --source alice --out alice-identity.json
+```
+
+**Flags:**
+- `--source <alias>`: Identity alias registered in Stellar CLI.
+- `--out <path>`: Destination filepath for the exported identity bundle.
+
+---
+
+### `identity import`
+
+Import a previously exported identity bundle into a local environment or CI runner.
+
+```bash
+npx ctg identity import --in alice-identity.json
+```
+
+**Flags:**
+- `--in <path>`: Path to the encrypted identity JSON bundle.
+
+---
+
+## Security Best Practices
+
+<Callout type="warning">
+  Never hardcode private keys (`S...`), seed phrases, or secret environment variables in your codebase. Always export identity aliases via Stellar CLI or rely on `identity import` in CI pipelines.
+</Callout>

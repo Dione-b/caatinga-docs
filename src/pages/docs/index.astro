@@ -1,0 +1,19 @@
+---
+import { resolveHref } from "@/lib/url";
+const target = resolveHref("/docs/getting-started/introduction");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <link rel="canonical" href={target} />
+    <title>Redirecting to Caatinga Docs...</title>
+  </head>
+  <body>
+    <script is:inline define:vars={{ target }}>
+      window.location.href = target;
+    </script>
+  </body>
+</html>

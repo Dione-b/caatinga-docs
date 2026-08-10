@@ -1,17 +1,53 @@
 ---
+import { highlightCommand } from "@/lib/shiki";
+
 interface Props {
+  title?: string;
+  code?: string;
+  lang?: string;
   class?: string;
 }
 
-const { class: className } = Astro.props as Props;
+const { title = "Terminal", code: rawCode, lang = "bash", class: className } = Astro.props as Props;
+
+let codeText = rawCode ?? "";
+if (!codeText && Astro.slots.has("default")) {
+  const rendered = await Astro.slots.render("default");
+  codeText = rendered.replace(/<[^>]*>/g, "").trim();
+}
+
+const highlightedHtml = codeText ? await highlightCommand(codeText, lang) : "";
 ---
 
-<div class:list={["overflow-hidden rounded-md border border-border", className]}>
-  <p
-    class="border-b border-border bg-surface px-4 py-1.5 text-xs font-medium tracking-wide text-muted uppercase"
+<div class:list={["overflow-hidden rounded-md border border-border bg-surface shadow-sm my-4", className]}>
+  <div
+    class="flex items-center justify-between border-b border-border bg-surface px-4 py-2 text-xs font-mono text-muted uppercase tracking-wider select-none"
   >
-    Terminal
-  </p>
-  <pre
-    class="overflow-x-auto bg-surface p-4 text-sm"><code class="font-mono text-ink"><slot /></code></pre>
+    <div class="flex items-center gap-1.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-danger/60 inline-block"></span>
+      <span class="h-2.5 w-2.5 rounded-full bg-warning/60 inline-block"></span>
+      <span class="h-2.5 w-2.5 rounded-full bg-success/60 inline-block"></span>
+    </div>
+    <span>{title}</span>
+  </div>
+  <div class="p-4 overflow-x-auto font-mono text-sm">
+    {
+      highlightedHtml ? (
+        <div class="shiki-terminal" set:html={highlightedHtml} />
+      ) : (
+        <pre><code class="text-ink"><slot /></code></pre>
+      )
+    }
+  </div>
 </div>
+
+<style is:global>
+  .shiki-terminal pre.astro-code,
+  .shiki-terminal pre.shiki {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: var(--font-mono);
+  }
+</style>

@@ -1,20 +1,53 @@
 ---
+import { highlightCommand } from "@/lib/shiki";
+
 interface Props {
+  code?: string;
+  lang?: string;
   prompt?: string;
   class?: string;
 }
 
-const { prompt = "$", class: className } = Astro.props as Props;
+const { code: rawCode, lang = "bash", prompt = "$", class: className } = Astro.props as Props;
+
+let codeText = rawCode ?? "";
+if (!codeText && Astro.slots.has("default")) {
+  const rendered = await Astro.slots.render("default");
+  codeText = rendered.replace(/<[^>]*>/g, "").trim();
+}
+
+const highlightedHtml = codeText ? await highlightCommand(codeText, lang) : "";
 ---
 
 <div
   class:list={[
-    "flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2.5 font-mono text-sm",
+    "flex items-center gap-3 rounded-md border border-border bg-surface px-4 py-2.5 font-mono text-sm shadow-sm overflow-x-auto",
     className,
   ]}
 >
-  <span class="text-muted select-none" aria-hidden="true">{prompt}</span>
-  <code class="text-ink">
-    <slot />
-  </code>
+  <span class="text-muted select-none font-bold" aria-hidden="true">{prompt}</span>
+  {
+    highlightedHtml ? (
+      <div class="flex-1 shiki-command" set:html={highlightedHtml} />
+    ) : (
+      <code class="text-ink flex-1">
+        <slot />
+      </code>
+    )
+  }
 </div>
+
+<style is:global>
+  .shiki-command pre.astro-code,
+  .shiki-command pre.shiki {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: var(--font-mono);
+  }
+  .shiki-command code {
+    background-color: transparent !important;
+    padding: 0 !important;
+  }
+</style>

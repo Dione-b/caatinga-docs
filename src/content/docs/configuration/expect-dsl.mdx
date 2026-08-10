@@ -1,0 +1,50 @@
+---
+title: Expect DSL & Assertions
+description: Declarative verification matchers for postDeploy, postDeployRead, smoke tests, and read --expect.
+sidebar:
+  order: 1
+---
+
+# Expect DSL & Assertion Matchers
+
+Caatinga includes a declarative Expect DSL shared across `postDeploy`, `postDeployRead`, `smoke.reads`, `ctg smoke`, and `ctg read --expect`.
+
+## Assertion Forms
+
+| Form | Example | Meaning |
+| :--- | :--- | :--- |
+| **Plain string** | `"42"` or `"${source.address}"` | Exact stdout match after placeholder resolution |
+| **`reachable`** | `{ matcher: "reachable" }` | Default in smoke checks (non-empty stdout) |
+| **`equals`** | `{ matcher: "equals", value: "42" }` | Numeric or string value equality |
+| **`isArray`** | `{ matcher: "isArray" }` | Parsed JSON payload is an array |
+| **`isNull`** | `{ matcher: "isNull" }` | Output is `null` or empty |
+| **`minLength`** | `{ matcher: "minLength", value: 1 }` | Parsed JSON array length ≥ value |
+| **`maxLength`** | `{ matcher: "maxLength", value: 10 }` | Parsed JSON array length ≤ value |
+| **`contains`** | `{ matcher: "contains", value: "abc" }` | Output substring match |
+| **`matches`** | `{ matcher: "matches", value: "^C[A-Z0-9]+$" }` | Regular expression match |
+| **`jsonEquals`** | `{ matcher: "jsonEquals", value: "[1,2]" }` | Deep JSON equality |
+
+## Configuration Example
+
+```typescript
+export default defineConfig({
+  project: "my-dapp",
+  postDeployRead: [
+    {
+      contract: "counter",
+      method: "get",
+      kind: "read",
+      expect: { matcher: "equals", value: "0" },
+    },
+  ],
+  smoke: {
+    reads: [
+      {
+        contract: "token",
+        method: "name",
+        expect: { matcher: "contains", value: "Governance" },
+      },
+    ],
+  },
+});
+```

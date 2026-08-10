@@ -1,0 +1,68 @@
+---
+title: Setup & Initial Workflow
+description: Quick walkthrough of initializing, building, deploying, and invoking your first Soroban dapp.
+sidebar:
+  order: 4
+---
+
+# Setup & Initial Workflow
+
+This step-by-step guide walks you through the complete lifecycle of a Soroban project with Caatinga.
+
+## Step 1: Scaffold Project
+
+Initialize a new project using the default `react-vite-counter` template:
+
+```bash
+npx ctg init my-dapp
+cd my-dapp
+npm install
+```
+
+## Step 2: Health Check
+
+Verify your toolchain and dependencies:
+
+```bash
+npx ctg doctor
+```
+
+## Step 3: Build Smart Contracts
+
+Compile the Rust contracts in `contracts/`:
+
+```bash
+npx ctg build
+```
+
+This compiles your contracts and generates `.wasm` binaries.
+
+## Step 4: Deploy to Testnet
+
+Deploy your contracts using your configured network and Stellar identity:
+
+```bash
+npx ctg deploy --network testnet --source alice
+```
+
+Caatinga resolves dependencies, deploys the WASM binaries on-chain, and writes contract metadata to `caatinga.artifacts.json`.
+
+## Step 5: Generate Bindings & Invoke
+
+Generate TypeScript bindings for your frontend:
+
+```bash
+npx ctg generate
+```
+
+Now invoke contract functions directly:
+
+```bash
+npx ctg invoke counter increment --source alice
+```
+
+Read the updated balance/counter state:
+
+```bash
+npx ctg read counter value
+```

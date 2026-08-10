@@ -1,0 +1,109 @@
+---
+title: Client API (@caatinga/client)
+description: Complete reference for createCaatingaClient, wallet adapters, and React hooks.
+sidebar:
+  order: 1
+---
+
+# Client API (`@caatinga/client`)
+
+The `@caatinga/client` package provides a browser-safe, strongly-typed interface for interacting with deployed Soroban contracts and wallet sessions.
+
+## 1. Client Initialization
+
+```typescript
+import { createCaatingaClient } from "@caatinga/client";
+import * as Counter from "./contracts/generated/counter";
+import artifacts from "../caatinga.artifacts.json";
+
+const client = createCaatingaClient({
+  network: {
+    name: "testnet",
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    networkPassphrase: "Test SDF Network ; September 2015",
+  },
+  artifacts,
+  wallet: myWalletAdapter,
+  contracts: {
+    counter: {
+      binding: Counter,
+    },
+  },
+  walletTimeout: 30_000,
+});
+```
+
+## 2. Invocation Methods
+
+### `read<T>(method, args?)`
+Read-only call. Simulates execution and returns the parsed value directly without requiring transaction signing.
+
+```typescript
+const count = await client.contract("counter").read<number>("get");
+```
+
+### `simulate<T>(method, options?)`
+Simulates execution and returns the raw simulation result payload (including cost, events, and raw XDR).
+
+```typescript
+const sim = await client.contract("counter").simulate<number>("get", { debugRaw: true });
+```
+
+### `invoke<T>(method, args?, options?)`
+Signs and submits a state-changing transaction via the connected wallet adapter.
+
+```typescript
+const result = await client.contract("counter").invoke<number>("increment");
+// Returns { status, contractId, transactionHash, result? }
+```
+
+### `buildXdr(method, args?)`
+Builds and prepares the unsigned/prepared XDR transaction payload without signing or submitting to the network.
+
+```typescript
+const tx = await client.contract("counter").buildXdr("increment");
+// Returns { unsignedXdr, preparedXdr }
+```
+
+---
+
+## 3. Wallet Session & React Integration
+
+### Framework-Agnostic Session
+
+```typescript
+import { createWalletSession } from "@caatinga/client";
+
+const session = createWalletSession(adapter, { persist: true });
+session.subscribe(() => render(session.getState()));
+await session.connect();
+await session.restore(); // Silent reconnect on page load
+```
+
+### React Hooks (`@caatinga/client/react`)
+
+```tsx
+import { WalletProvider, useWallet } from "@caatinga/client/react";
+
+function App() {
+  return (
+    <WalletProvider adapter={myWalletAdapter} options={{ persist: true }}>
+      <CounterComponent />
+    </WalletProvider>
+  );
+}
+
+function CounterComponent() {
+  const { publicKey, connected, connect, disconnect } = useWallet();
+
+  return (
+    <div>
+      {connected ? (
+        <button onClick={disconnect}>Connected: {publicKey}</button>
+      ) : (
+        <button onClick={connect}>Connect Wallet</button>
+      )}
+    </div>
+  );
+}
+```

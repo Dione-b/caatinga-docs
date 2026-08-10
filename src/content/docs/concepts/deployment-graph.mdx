@@ -1,0 +1,55 @@
+---
+title: Deployment Graph
+description: How Caatinga resolves multi-contract dependencies and topological execution order.
+sidebar:
+  order: 2
+---
+
+# Deployment Graph
+
+In modern dApps, smart contracts rarely exist in isolation. A Liquidity Pool contract depends on Token contracts; a Governance Vault depends on Staking and Token contracts.
+
+Caatinga handles multi-contract dependencies natively using a **Topological Deployment Graph**.
+
+## Defining Dependencies
+
+Dependencies are declared in `caatinga.config.ts` using the `dependsOn` property:
+
+```typescript
+export default defineConfig({
+  project: { name: "defi-dapp" },
+  contracts: {
+    token: {
+      path: "contracts/token",
+    },
+    vault: {
+      path: "contracts/vault",
+      dependsOn: ["token"],
+    },
+    market: {
+      path: "contracts/market",
+      dependsOn: ["token", "vault"],
+    },
+  },
+});
+```
+
+## Graph Resolution & Order
+
+When you execute `npx ctg deploy`, Caatinga resolves the graph:
+
+```text
+token
+  │
+  ├──────→ vault
+  │           │
+  └──────→ market
+```
+
+1. **`token`** has 0 dependencies → Deployed first. Its Contract ID is recorded.
+2. **`vault`** depends on `token` → Deployed second. Caatinga injects `token`'s deployed Contract ID into `vault`'s initialization parameters.
+3. **`market`** depends on `token` and `vault` → Deployed third once both prerequisites are confirmed on-chain.
+
+## Cycle Validation
+
+Caatinga validates the DAG during config loading. If a cycle is detected (e.g. `A` depends on `B` and `B` depends on `A`), deployment halts immediately with error code `CAATINGA_CONFIG_CYCLE_DETECTED`.

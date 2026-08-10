@@ -1,48 +1,55 @@
 ---
 title: Introduction
-description: What Caatinga is and how the deployment workflow fits together.
+description: Overview of Caatinga, the deployment orchestrator and versioned artifact manager for Soroban.
 sidebar:
   order: 1
 ---
 
-<Note title="Work in progress">
-  This page is a stub from Sprint 3 — the full Getting Started section lands in Sprint 9.
-</Note>
+# Introduction to Caatinga
 
-Caatinga is a deployment orchestration and versioned artifacts tool for Soroban. It manages the full lifecycle of a contract — from source to a deployed, invokable instance — and keeps a record of every deployment in your own Git repository.
+**Caatinga** is a deployment orchestrator and versioned artifact manager for **Stellar Soroban** smart contracts.
 
-## What is Caatinga?
+It bridges the gap between Rust smart contract development, automated multi-contract deployment, and frontend integration.
 
-Instead of tracking deployed contract IDs and WASM hashes by hand, Caatinga generates a versioned artifact file per project and derives browser-ready TypeScript bindings from it — no hosted registry required.
+## Why Caatinga?
 
-### Why not just use the Stellar CLI directly?
+Developing smart contracts on Stellar Soroban involves multiple steps:
+1. Compiling Rust crates into optimized `.wasm` bytecode binaries.
+2. Managing network configurations and secret keys or identity aliases.
+3. Deploying contracts to Stellar networks (Local Sandbox, Testnet, Mainnet).
+4. Extracting deployed Contract IDs and recording WASM hashes.
+5. Generating type-safe TypeScript bindings for web applications.
+6. Invoking and testing contract functions on-chain.
 
-You still do — Caatinga orchestrates the Stellar CLI rather than replacing it, adding dependency resolution across contracts, upgrade tracking, and generated bindings on top.
-
-## The deployment workflow
-
-Every project follows the same three-command flow:
+Without an orchestrator, developers often write custom scripts or manually copy contract IDs into `.env` files. Caatinga automates this entire pipeline into a single declarative workflow:
 
 <Steps>
-<Step title="Initialize the project">
-
-```bash
-caatinga init my-dapp
-```
-
-</Step>
-<Step title="Build the contracts">
-
-```bash
-caatinga build
-```
-
-</Step>
-<Step title="Deploy">
-
-```bash
-caatinga deploy --network testnet
-```
-
-</Step>
+  <Step title="Initialize Project">
+    Run `npx ctg init my-dapp` to scaffold a project with `caatinga.config.ts`.
+  </Step>
+  <Step title="Build Contracts">
+    Compile Rust contracts using `npx ctg build`.
+  </Step>
+  <Step title="Deploy & Graph Resolution">
+    Deploy contracts in topological dependency order using `npx ctg deploy`.
+  </Step>
+  <Step title="Generate Bindings">
+    Instantly produce TypeScript client bindings via `npx ctg generate`.
+  </Step>
+  <Step title="Invoke & Read">
+    Interact with your contract state using `ctg invoke` and `ctg read`.
+  </Step>
 </Steps>
+
+## Core Mental Model
+
+Caatinga operates on two source of truth files in your workspace:
+
+- **`caatinga.config.ts`**: Declarative configuration defining contracts, dependencies, network endpoints, and post-deploy hooks.
+- **`caatinga.artifacts.json`**: Deterministic record storing contract IDs, WASM hashes, deployment timestamps, network states, and upgrade history.
+
+<Callout type="tip">
+  Never edit `caatinga.artifacts.json` manually. Caatinga updates this file atomically during builds and deployments.
+</Callout>
+
+Next up: Check the [Requirements](/docs/getting-started/requirements) or follow the [Installation](/docs/getting-started/installation) guide.

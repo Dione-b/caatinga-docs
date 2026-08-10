@@ -5,10 +5,12 @@ import { mdxComponents } from "@/lib/mdx-components";
 
 export async function getStaticPaths() {
   const entries = await getCollection("docs");
-  return entries.map((entry) => ({
-    params: { slug: entry.id === "index" ? undefined : entry.id },
-    props: { entry },
-  }));
+  return entries
+    .filter((entry) => entry.id !== "index")
+    .map((entry) => ({
+      params: { slug: entry.id },
+      props: { entry },
+    }));
 }
 
 const { entry } = Astro.props as { entry: CollectionEntry<"docs"> };

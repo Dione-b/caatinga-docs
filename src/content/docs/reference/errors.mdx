@@ -1,0 +1,62 @@
+---
+title: Error Reference
+description: Searchable public error code reference for CAATINGA_* machine-readable error codes.
+sidebar:
+  order: 2
+---
+
+# Error Reference (`CAATINGA_*`)
+
+Caatinga enforces machine-readable error codes for automation, CI pipelines, and programatic CLI integration.
+
+When a command fails, Caatinga returns a structured error payload containing the error code, category, description, and resolution instructions.
+
+---
+
+## Error Catalog
+
+### `CAATINGA_CONFIG_NOT_FOUND`
+- **Category**: Configuration
+- **Description**: `caatinga.config.ts` was not found in the root directory.
+- **Common Causes**: Running commands outside a Caatinga workspace root.
+- **How to Fix**: Run `npx ctg init` or navigate to your project root containing `caatinga.config.ts`.
+
+---
+
+### `CAATINGA_CONFIG_CYCLE_DETECTED`
+- **Category**: Dependency Graph
+- **Description**: Circular dependency detected during contract graph resolution.
+- **Common Causes**: Contract A depends on Contract B while Contract B depends on Contract A in `dependsOn`.
+- **How to Fix**: Inspect contract `dependsOn` declarations and refactor circular relationships.
+
+---
+
+### `CAATINGA_BUILD_FAILED`
+- **Category**: Compilation
+- **Description**: Cargo/rustc failed to compile contract WASM binaries.
+- **Common Causes**: Rust compilation errors, missing dependencies, or incompatible Soroban SDK versions.
+- **How to Fix**: Check the Rust compiler output in stderr and run `cargo check` inside the contract crate directory.
+
+---
+
+### `CAATINGA_DEPLOY_FAILED`
+- **Category**: Deployment
+- **Description**: Deployment failed during Stellar network execution.
+- **Common Causes**: Insufficient account balance for fees, invalid identity alias, or network RPC timeout.
+- **How to Fix**: Verify `npx ctg doctor`, check account funds on Testnet/Mainnet, and ensure `--source` alias exists.
+
+---
+
+### `CAATINGA_SOURCE_INVALID_KEY`
+- **Category**: Security / Identity
+- **Description**: `--source` parameter contained a raw key (`G...`, `S...`) or secret phrase instead of a Stellar CLI identity alias.
+- **Common Causes**: Passing raw Stellar secret key or public key to CLI.
+- **How to Fix**: Use an identity alias (e.g. `--source alice`). See [CLI Identity Reference](/docs/cli/identity).
+
+---
+
+### `CAATINGA_ARTIFACT_NOT_FOUND`
+- **Category**: Artifacts
+- **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.
+- **Common Causes**: Attempting `ctg invoke` or `ctg generate` before running `ctg deploy`.
+- **How to Fix**: Run `npx ctg deploy --network <network>` to generate artifacts.

@@ -1,0 +1,71 @@
+---
+import { highlightCommand } from "@/lib/shiki";
+
+interface Props {
+  code?: string;
+  lang?: string;
+  filename?: string;
+  class?: string;
+}
+
+const { code: rawCode, lang = "bash", filename, class: className } = Astro.props as Props;
+
+let codeText = rawCode ?? "";
+if (!codeText && Astro.slots.has("default")) {
+  const rendered = await Astro.slots.render("default");
+  codeText = rendered.replace(/<[^>]*>/g, "").trim();
+}
+
+const highlightedHtml = codeText ? await highlightCommand(codeText, lang) : "";
+---
+
+<div class:list={["group relative overflow-hidden rounded-md border border-border bg-surface shadow-sm my-4", className]}>
+  <div class="flex items-center justify-between border-b border-border bg-surface px-4 py-2 text-xs font-mono text-muted select-none">
+    <span>{filename ?? lang}</span>
+    <button
+      type="button"
+      class="copy-btn rounded px-2 py-0.5 text-xs text-muted hover:bg-bg hover:text-ink transition-colors cursor-pointer"
+      data-code={codeText}
+    >
+      Copy
+    </button>
+  </div>
+  <div class="p-4 overflow-x-auto font-mono text-sm">
+    {
+      highlightedHtml ? (
+        <div class="shiki-codeblock" set:html={highlightedHtml} />
+      ) : (
+        <pre><code class="text-ink"><slot /></code></pre>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".copy-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        const code = button.getAttribute("data-code");
+        if (code) {
+          navigator.clipboard.writeText(code);
+          const originalText = button.textContent;
+          button.textContent = "Copied!";
+          setTimeout(() => {
+            button.textContent = originalText;
+          }, 2000);
+        }
+      });
+    });
+  });
+</script>
+
+<style is:global>
+  .shiki-codeblock pre.astro-code,
+  .shiki-codeblock pre.shiki {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: var(--font-mono);
+  }
+</style>
