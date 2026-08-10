@@ -18,10 +18,10 @@ Early bootstrap (Sprint 0/1 of the [rebuild plan](./ROADMAP.md)). Not yet deploy
 ## Development
 
 ```bash
-npm install
-npm run dev       # http://localhost:4321
-npm run build     # production build
-npm run preview   # preview the production build
+pnpm install
+pnpm dev       # http://localhost:4321
+pnpm build     # production build
+pnpm preview   # preview the production build
 ```
 
 ## License
