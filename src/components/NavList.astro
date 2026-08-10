@@ -1,6 +1,5 @@
 ---
-import { nav } from "@/config/nav";
-import { normalize } from "@/lib/docs-nav";
+import { getNav, normalizePath } from "@/lib/docs-nav";
 import { resolveHref } from "@/lib/url";
 
 interface Props {
@@ -8,17 +7,18 @@ interface Props {
 }
 
 const { class: className } = Astro.props as Props;
-const current = normalize(Astro.url.pathname);
+const current = normalizePath(Astro.url.pathname);
+const sections = await getNav();
 ---
 
 <nav class:list={["flex flex-col gap-6", className]} aria-label="Documentation">
   {
-    nav.map((section) => (
+    sections.map((section) => (
       <div>
         <p class="px-2 text-xs font-semibold tracking-wide text-muted uppercase">{section.title}</p>
         <ul class="mt-2 flex flex-col gap-0.5">
           {section.pages.map((page) => {
-            const active = normalize(page.href) === current;
+            const active = normalizePath(page.href) === current;
             return (
               <li>
                 <a

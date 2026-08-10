@@ -1,64 +1,54 @@
 ---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
 
+interface Props {
+  headings?: Heading[];
+}
+
+const { headings = [] } = Astro.props as Props;
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
-<nav
-  id="toc"
-  data-toc
-  aria-label="On this page"
-  class="sticky top-16 hidden max-h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-3 overflow-y-auto py-8 pl-4 xl:flex"
->
-  <p class="text-xs font-semibold tracking-wide text-muted uppercase">On this page</p>
-  <ul class="toc-list flex flex-col gap-1.5 text-sm"></ul>
-</nav>
+{
+  items.length > 0 && (
+    <nav
+      id="toc"
+      aria-label="On this page"
+      class="sticky top-16 hidden max-h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-3 overflow-y-auto py-8 pl-4 xl:flex"
+    >
+      <p class="text-xs font-semibold tracking-wide text-muted uppercase">On this page</p>
+      <ul class="flex flex-col gap-1.5 text-sm">
+        {items.map((item) => (
+          <li>
+            <a
+              href={`#${item.slug}`}
+              data-toc-link
+              class:list={[
+                "block text-muted transition-colors hover:text-ink",
+                item.depth === 3 && "pl-3",
+              ]}
+            >
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
 
 <script>
-  function slugify(text: string) {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-");
-  }
+  function initTocScrollspy() {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"));
+    if (links.length === 0) return;
 
-  function initToc() {
-    const toc = document.getElementById("toc");
-    const list = toc?.querySelector<HTMLUListElement>(".toc-list");
-    const content = document.querySelector<HTMLElement>(".docs-content");
-    if (!toc || !list || !content) return;
-
-    const headings = Array.from(content.querySelectorAll<HTMLElement>("h2, h3"));
-    if (headings.length === 0) {
-      toc.hidden = true;
-      return;
-    }
-
-    const seen = new Set<string>();
-    const links: HTMLAnchorElement[] = [];
-
-    headings.forEach((heading) => {
-      if (!heading.id) {
-        const base = slugify(heading.textContent ?? "");
-        let unique = base;
-        let i = 1;
-        while (seen.has(unique) || document.getElementById(unique)) {
-          unique = `${base}-${i++}`;
-        }
-        heading.id = unique;
-      }
-      seen.add(heading.id);
-
-      const li = document.createElement("li");
-      const a = document.createElement("a");
-      a.href = `#${heading.id}`;
-      a.textContent = heading.textContent ?? "";
-      a.className =
-        (heading.tagName === "H3" ? "pl-3 " : "") +
-        "block text-muted hover:text-ink transition-colors";
-      li.appendChild(a);
-      list.appendChild(li);
-      links.push(a);
-    });
+    const targets = links
+      .map((link) => document.getElementById(link.getAttribute("href")!.slice(1)))
+      .filter((el): el is HTMLElement => el !== null);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -73,8 +63,8 @@
       { rootMargin: "-96px 0px -70% 0px" }
     );
 
-    headings.forEach((heading) => observer.observe(heading));
+    targets.forEach((target) => observer.observe(target));
   }
 
-  initToc();
+  initTocScrollspy();
 </script>

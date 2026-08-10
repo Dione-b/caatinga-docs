@@ -5,12 +5,19 @@ import TableOfContents from "@components/TableOfContents.astro";
 import Breadcrumb from "@components/Breadcrumb.astro";
 import PrevNext from "@components/PrevNext.astro";
 
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
 interface Props {
   title: string;
   description?: string;
+  headings?: Heading[];
 }
 
-const { title, description } = Astro.props as Props;
+const { title, description, headings = [] } = Astro.props as Props;
 ---
 
 <Layout title={title} description={description}>
@@ -23,6 +30,6 @@ const { title, description } = Astro.props as Props;
       </article>
       <PrevNext />
     </div>
-    <TableOfContents />
+    <TableOfContents headings={headings} />
   </div>
 </Layout>

@@ -115,4 +115,45 @@
   p {
     text-wrap: pretty;
   }
+
+  /* Markdown/MDX-rendered content — components (Link, Code, Alert, ...)
+     style themselves; this covers the plain tags MDX produces directly. */
+  .docs-content h2 {
+    @apply text-2xl font-semibold tracking-tight text-ink;
+  }
+
+  .docs-content h3 {
+    @apply text-xl font-semibold tracking-tight text-ink;
+  }
+
+  .docs-content p {
+    @apply text-muted;
+  }
+
+  .docs-content ul {
+    @apply list-disc pl-5 text-muted;
+  }
+
+  .docs-content ol {
+    @apply list-decimal pl-5 text-muted;
+  }
+
+  /* Shiki dual-theme (markdown.shikiConfig.defaultColor: false) — switch
+     via our data-theme attribute instead of Shiki's default .dark class.
+     Copy button / line highlighting / file tabs land in Sprint 6. */
+  .astro-code {
+    @apply rounded-md border border-border p-4 text-sm;
+  }
+
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+
+  :root[data-theme="dark"] .astro-code,
+  :root[data-theme="dark"] .astro-code span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
 }

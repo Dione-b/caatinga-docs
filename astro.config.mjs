@@ -12,6 +12,16 @@ export default defineConfig({
   base: "/caatinga-docs/",
   integrations: [mdx(), vue(), icon()],
 
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: "github-light",
+        dark: "github-dark",
+      },
+      defaultColor: false,
+    },
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

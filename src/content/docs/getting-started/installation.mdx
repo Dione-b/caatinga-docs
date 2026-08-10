@@ -1,0 +1,40 @@
+---
+title: Installation
+description: Requirements and installation instructions for the Caatinga CLI.
+sidebar:
+  order: 2
+---
+
+import Alert from "@components/Alert.astro";
+import Tabs from "@components/Tabs.astro";
+import Tab from "@components/Tab.astro";
+import Code from "@components/Code.astro";
+
+<Alert variant="info" title="Work in progress">
+  This page is a stub from Sprint 3 — the full Getting Started section lands in Sprint 9.
+</Alert>
+
+Install the Caatinga CLI globally, or run it directly with your package manager's dlx command.
+
+## Requirements
+
+- Node.js 22 or later
+- Stellar CLI installed and on your `PATH`
+
+## Install the CLI
+
+<Tabs>
+  <Tab label="npm">
+    <Code block>npm install -g @caatinga/cli</Code>
+  </Tab>
+  <Tab label="pnpm">
+    <Code block>pnpm add -g @caatinga/cli</Code>
+  </Tab>
+  <Tab label="yarn">
+    <Code block>yarn global add @caatinga/cli</Code>
+  </Tab>
+</Tabs>
+
+### Without a global install
+
+Both the `caatinga` and `ctg` aliases also work through your package manager's runner, e.g. `npx caatinga doctor`.

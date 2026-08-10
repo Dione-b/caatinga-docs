@@ -1,0 +1,37 @@
+---
+title: Introduction
+description: What Caatinga is and how the deployment workflow fits together.
+sidebar:
+  order: 1
+---
+
+import Alert from "@components/Alert.astro";
+import Code from "@components/Code.astro";
+
+<Alert variant="info" title="Work in progress">
+  This page is a stub from Sprint 3 — the full Getting Started section lands in Sprint 9.
+</Alert>
+
+Caatinga is a deployment orchestration and versioned artifacts tool for Soroban. It manages the full lifecycle of a contract — from source to a deployed, invokable instance — and keeps a record of every deployment in your own Git repository.
+
+## What is Caatinga?
+
+Instead of tracking deployed contract IDs and WASM hashes by hand, Caatinga generates a versioned artifact file per project and derives browser-ready TypeScript bindings from it — no hosted registry required.
+
+### Why not just use the Stellar CLI directly?
+
+You still do — Caatinga orchestrates the Stellar CLI rather than replacing it, adding dependency resolution across contracts, upgrade tracking, and generated bindings on top.
+
+## The deployment workflow
+
+Every project follows the same six-stage flow:
+
+<Code block>{"init → build → deploy → generate → invoke / read"}</Code>
+
+In practice, that looks like:
+
+```bash
+caatinga init my-dapp
+caatinga build
+caatinga deploy --network testnet
+```

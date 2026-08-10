@@ -2,7 +2,7 @@
 import { getBreadcrumb } from "@/lib/docs-nav";
 import { resolveHref } from "@/lib/url";
 
-const trail = getBreadcrumb(Astro.url.pathname);
+const trail = await getBreadcrumb(Astro.url.pathname);
 ---
 
 <nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-1.5 text-sm text-muted">

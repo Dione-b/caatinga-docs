@@ -1,11 +1,69 @@
-import { nav, flatNav, type NavPage } from "@/config/nav";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+export interface NavPage {
+  title: string;
+  href: string;
+}
+
+export interface NavSection {
+  title: string;
+  pages: NavPage[];
+}
+
+function humanize(slug: string): string {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function entryHref(entry: CollectionEntry<"docs">): string {
+  return entry.id === "index" ? "/docs" : `/docs/${entry.id}`;
+}
+
+/**
+ * Section = first path segment. Entries with no folder (just the root
+ * `index.mdx` today) are grouped into "Getting Started" until more
+ * top-level sections exist to disambiguate.
+ */
+function entrySection(entry: CollectionEntry<"docs">): string {
+  const [first, ...rest] = entry.id.split("/");
+  return rest.length === 0 ? "Getting Started" : humanize(first);
+}
+
+export async function getNav(): Promise<NavSection[]> {
+  const entries = await getCollection("docs");
+
+  const sections = new Map<string, CollectionEntry<"docs">[]>();
+  for (const entry of entries) {
+    const section = entrySection(entry);
+    const list = sections.get(section) ?? [];
+    list.push(entry);
+    sections.set(section, list);
+  }
+
+  return Array.from(sections.entries()).map(([title, sectionEntries]) => ({
+    title,
+    pages: sectionEntries
+      .sort((a, b) => a.data.sidebar.order - b.data.sidebar.order)
+      .map((entry) => ({
+        title: entry.data.sidebar.label ?? entry.data.title,
+        href: entryHref(entry),
+      })),
+  }));
+}
+
+export async function getFlatNav(): Promise<NavPage[]> {
+  const sections = await getNav();
+  return sections.flatMap((section) => section.pages);
+}
 
 /**
  * Astro.url.pathname includes the configured `base` (e.g. "/caatinga-docs/…"),
- * while nav.ts hrefs are base-agnostic ("/docs/…") so the config stays
- * portable. Strip the base before comparing the two.
+ * while nav hrefs are base-agnostic ("/docs/…"). Strip the base before
+ * comparing the two.
  */
-export function normalize(pathname: string): string {
+export function normalizePath(pathname: string): string {
   const base = import.meta.env.BASE_URL;
   const withoutBase =
     base !== "/" && pathname.startsWith(base) ? "/" + pathname.slice(base.length) : pathname;
@@ -17,14 +75,15 @@ export interface Breadcrumb {
   href: string;
 }
 
-export function getBreadcrumb(pathname: string): Breadcrumb[] {
-  const current = normalize(pathname);
+export async function getBreadcrumb(pathname: string): Promise<Breadcrumb[]> {
+  const current = normalizePath(pathname);
   const trail: Breadcrumb[] = [{ title: "Docs", href: "/docs" }];
+  const sections = await getNav();
 
-  for (const section of nav) {
-    const page = section.pages.find((p) => normalize(p.href) === current);
+  for (const section of sections) {
+    const page = section.pages.find((p) => normalizePath(p.href) === current);
     if (!page) continue;
-    if (section.pages[0].href !== page.href) {
+    if (normalizePath(section.pages[0].href) !== normalizePath(page.href)) {
       trail.push({ title: section.title, href: section.pages[0].href });
     }
     trail.push({ title: page.title, href: page.href });
@@ -39,12 +98,13 @@ export interface PrevNext {
   next: NavPage | null;
 }
 
-export function getPrevNext(pathname: string): PrevNext {
-  const current = normalize(pathname);
-  const index = flatNav.findIndex((page) => normalize(page.href) === current);
+export async function getPrevNext(pathname: string): Promise<PrevNext> {
+  const current = normalizePath(pathname);
+  const flat = await getFlatNav();
+  const index = flat.findIndex((page) => normalizePath(page.href) === current);
   if (index === -1) return { prev: null, next: null };
   return {
-    prev: index > 0 ? flatNav[index - 1] : null,
-    next: index < flatNav.length - 1 ? flatNav[index + 1] : null,
+    prev: index > 0 ? flat[index - 1] : null,
+    next: index < flat.length - 1 ? flat[index + 1] : null,
   };
 }
