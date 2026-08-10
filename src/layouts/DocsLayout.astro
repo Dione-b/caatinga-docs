@@ -1,0 +1,28 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Sidebar from "@components/Sidebar.astro";
+import TableOfContents from "@components/TableOfContents.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import PrevNext from "@components/PrevNext.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props as Props;
+---
+
+<Layout title={title} description={description}>
+  <div class="mx-auto flex w-full max-w-[90rem] gap-8 px-6">
+    <Sidebar />
+    <div class="min-w-0 flex-1 py-10">
+      <Breadcrumb />
+      <article class="docs-content flex flex-col gap-4">
+        <slot />
+      </article>
+      <PrevNext />
+    </div>
+    <TableOfContents />
+  </div>
+</Layout>

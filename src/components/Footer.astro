@@ -1,0 +1,19 @@
+---
+import Container from "@components/Container.astro";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border">
+  <Container size="xl">
+    <div
+      class="flex flex-col gap-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>© {year} Caatinga contributors. MIT License.</p>
+      <div class="flex gap-4">
+        <a href="https://github.com/Dione-b/caatinga" class="hover:text-ink">GitHub</a>
+        <a href="https://www.npmjs.com/package/@caatinga/cli" class="hover:text-ink">npm</a>
+      </div>
+    </div>
+  </Container>
+</footer>

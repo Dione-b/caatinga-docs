@@ -11,7 +11,6 @@ import Tabs from "@components/Tabs.astro";
 import Tab from "@components/Tab.astro";
 import LinkComponent from "@components/Link.astro";
 import Code from "@components/Code.astro";
-import ThemeToggle from "@components/ThemeToggle.astro";
 
 const colorSwatches = [
   { name: "bg", class: "bg-bg" },
@@ -57,14 +56,11 @@ const shadows = [
 
 <Layout title="Design System">
   <Container size="lg">
-    <div class="flex items-center justify-between py-12">
-      <div>
-        <Heading level={1}>Design System</Heading>
-        <p class="mt-2 text-muted">
-          Tokens and base components for Caatinga Docs 2.0 — <Code>Sprint 2</Code>.
-        </p>
-      </div>
-      <ThemeToggle />
+    <div class="py-12">
+      <Heading level={1}>Design System</Heading>
+      <p class="mt-2 text-muted">
+        Tokens and base components for Caatinga Docs 2.0 — <Code>Sprint 2</Code>.
+      </p>
     </div>
 
     <section class="flex flex-col gap-6 pb-16">

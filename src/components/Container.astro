@@ -1,6 +1,6 @@
 ---
 interface Props {
-  size?: "sm" | "md" | "lg" | "full";
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   class?: string;
 }
 
@@ -10,6 +10,7 @@ const widths: Record<NonNullable<Props["size"]>, string> = {
   sm: "max-w-2xl",
   md: "max-w-3xl",
   lg: "max-w-5xl",
+  xl: "max-w-[90rem]",
   full: "max-w-none",
 };
 ---

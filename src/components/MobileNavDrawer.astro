@@ -1,0 +1,96 @@
+---
+import NavList from "@components/NavList.astro";
+import Divider from "@components/Divider.astro";
+import { Icon } from "astro-icon/components";
+import { resolveHref } from "@/lib/url";
+---
+
+<div
+  id="mobile-nav-backdrop"
+  hidden
+  class="fixed inset-0 z-(--z-modal-backdrop) bg-black/50 lg:hidden"
+>
+</div>
+<div
+  id="mobile-nav-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Navigation menu"
+  hidden
+  class="fixed inset-y-0 left-0 z-(--z-modal) flex w-72 flex-col gap-6 overflow-y-auto border-r border-border bg-bg p-6 lg:hidden"
+>
+  <div class="flex items-center justify-between">
+    <span class="text-sm font-semibold tracking-tight text-ink">Menu</span>
+    <button
+      type="button"
+      id="mobile-nav-close"
+      aria-label="Close navigation menu"
+      class="inline-flex size-8 items-center justify-center rounded-md text-muted hover:text-ink"
+    >
+      <Icon name="lucide:x" class="size-5" aria-hidden="true" />
+    </button>
+  </div>
+
+  <a href={resolveHref("/docs")} class="text-sm font-medium text-ink">Docs</a>
+
+  <NavList />
+
+  <Divider />
+
+  <div class="flex flex-col gap-3 text-sm text-muted">
+    <a
+      href="https://github.com/Dione-b/caatinga"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-2 hover:text-ink"
+    >
+      <Icon name="lucide:github" class="size-4" aria-hidden="true" />
+      GitHub
+    </a>
+    <a
+      href="https://www.npmjs.com/package/@caatinga/cli"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-2 hover:text-ink"
+    >
+      <Icon name="lucide:package" class="size-4" aria-hidden="true" />
+      npm
+    </a>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const trigger = document.getElementById("mobile-nav-trigger");
+    const drawer = document.getElementById("mobile-nav-drawer");
+    const backdrop = document.getElementById("mobile-nav-backdrop");
+    const closeButton = document.getElementById("mobile-nav-close");
+    if (!trigger || !drawer || !backdrop || !closeButton) return;
+
+    function open() {
+      drawer.hidden = false;
+      backdrop.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      document.body.style.overflow = "hidden";
+      closeButton.focus();
+    }
+
+    function close() {
+      drawer.hidden = true;
+      backdrop.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = "";
+      trigger.focus();
+    }
+
+    trigger.addEventListener("click", open);
+    closeButton.addEventListener("click", close);
+    backdrop.addEventListener("click", close);
+    drawer.addEventListener("click", (event) => {
+      if (event.target instanceof HTMLElement && event.target.closest("a")) close();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !drawer.hidden) close();
+    });
+  })();
+</script>

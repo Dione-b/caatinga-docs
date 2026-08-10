@@ -1,0 +1,25 @@
+---
+import { getBreadcrumb } from "@/lib/docs-nav";
+import { resolveHref } from "@/lib/url";
+
+const trail = getBreadcrumb(Astro.url.pathname);
+---
+
+<nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-1.5 text-sm text-muted">
+  {
+    trail.map((item, index) => (
+      <>
+        {index > 0 && <span aria-hidden="true">/</span>}
+        {index === trail.length - 1 ? (
+          <span class="text-ink" aria-current="page">
+            {item.title}
+          </span>
+        ) : (
+          <a href={resolveHref(item.href)} class="hover:text-ink">
+            {item.title}
+          </a>
+        )}
+      </>
+    ))
+  }
+</nav>

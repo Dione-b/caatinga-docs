@@ -1,0 +1,55 @@
+---
+import Container from "@components/Container.astro";
+import ThemeToggle from "@components/ThemeToggle.astro";
+import MobileNavDrawer from "@components/MobileNavDrawer.astro";
+import { Icon } from "astro-icon/components";
+import { resolveHref } from "@/lib/url";
+---
+
+<header class="sticky top-0 z-(--z-sticky) border-b border-border bg-bg">
+  <Container size="xl">
+    <div class="flex h-16 items-center justify-between gap-4">
+      <div class="flex items-center gap-6">
+        <a href={resolveHref("/")} class="text-sm font-semibold tracking-tight text-ink">
+          CAATINGA
+        </a>
+        <nav class="hidden items-center gap-4 text-sm text-muted lg:flex">
+          <a href={resolveHref("/docs")} class="hover:text-ink">Docs</a>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a
+          href="https://github.com/Dione-b/caatinga"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden items-center gap-1.5 text-sm text-muted hover:text-ink lg:flex"
+        >
+          <Icon name="lucide:github" class="size-4" aria-hidden="true" />
+          GitHub
+        </a>
+        <a
+          href="https://www.npmjs.com/package/@caatinga/cli"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden items-center gap-1.5 text-sm text-muted hover:text-ink lg:flex"
+        >
+          <Icon name="lucide:package" class="size-4" aria-hidden="true" />
+          npm
+        </a>
+        <ThemeToggle />
+        <button
+          type="button"
+          id="mobile-nav-trigger"
+          aria-label="Open navigation menu"
+          aria-expanded="false"
+          aria-controls="mobile-nav-drawer"
+          class="inline-flex size-9 items-center justify-center rounded-md text-ink lg:hidden"
+        >
+          <Icon name="lucide:menu" class="size-5" aria-hidden="true" />
+        </button>
+      </div>
+    </div>
+  </Container>
+</header>
+<MobileNavDrawer />

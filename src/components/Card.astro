@@ -1,4 +1,6 @@
 ---
+import { resolveHref } from "@/lib/url";
+
 interface Props {
   href?: string;
   class?: string;
@@ -6,6 +8,7 @@ interface Props {
 
 const { href, class: className, ...rest } = Astro.props as Props;
 const Tag = href ? "a" : "div";
+const resolvedHref = href ? resolveHref(href) : undefined;
 
 const classes = [
   "block rounded-md border border-border bg-surface p-5",
@@ -14,6 +17,6 @@ const classes = [
 ];
 ---
 
-<Tag href={href} class:list={classes} {...rest}>
+<Tag href={resolvedHref} class:list={classes} {...rest}>
   <slot />
 </Tag>

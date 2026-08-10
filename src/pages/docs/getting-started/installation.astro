@@ -1,0 +1,47 @@
+---
+import DocsLayout from "@layouts/DocsLayout.astro";
+import Heading from "@components/Heading.astro";
+import Alert from "@components/Alert.astro";
+import Code from "@components/Code.astro";
+import Tabs from "@components/Tabs.astro";
+import Tab from "@components/Tab.astro";
+---
+
+<DocsLayout title="Installation">
+  <Alert variant="info" title="Work in progress">
+    <p>
+      This page is a stub for Sprint 3 (docs shell). The full Getting Started section lands in
+      Sprint 9.
+    </p>
+  </Alert>
+
+  <Heading level={1}>Installation</Heading>
+  <p class="text-muted">
+    Install the Caatinga CLI globally, or run it directly with your package manager's dlx command.
+  </p>
+
+  <Heading level={2}>Requirements</Heading>
+  <ul class="list-disc pl-5 text-muted">
+    <li>Node.js 22 or later</li>
+    <li>Stellar CLI installed and on your <Code>PATH</Code></li>
+  </ul>
+
+  <Heading level={2}>Install the CLI</Heading>
+  <Tabs>
+    <Tab label="npm">
+      <Code block>npm install -g @caatinga/cli</Code>
+    </Tab>
+    <Tab label="pnpm">
+      <Code block>pnpm add -g @caatinga/cli</Code>
+    </Tab>
+    <Tab label="yarn">
+      <Code block>yarn global add @caatinga/cli</Code>
+    </Tab>
+  </Tabs>
+
+  <Heading level={3}>Without a global install</Heading>
+  <p class="text-muted">
+    Both the <Code>caatinga</Code> and <Code>ctg</Code> aliases also work through your package manager's
+    runner, e.g. <Code>npx caatinga doctor</Code>.
+  </p>
+</DocsLayout>

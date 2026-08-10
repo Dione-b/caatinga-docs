@@ -1,0 +1,43 @@
+---
+import { nav } from "@/config/nav";
+import { normalize } from "@/lib/docs-nav";
+import { resolveHref } from "@/lib/url";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props as Props;
+const current = normalize(Astro.url.pathname);
+---
+
+<nav class:list={["flex flex-col gap-6", className]} aria-label="Documentation">
+  {
+    nav.map((section) => (
+      <div>
+        <p class="px-2 text-xs font-semibold tracking-wide text-muted uppercase">{section.title}</p>
+        <ul class="mt-2 flex flex-col gap-0.5">
+          {section.pages.map((page) => {
+            const active = normalize(page.href) === current;
+            return (
+              <li>
+                <a
+                  href={resolveHref(page.href)}
+                  aria-current={active ? "page" : undefined}
+                  class:list={[
+                    "block rounded-md px-2 py-1.5 text-sm transition-colors",
+                    active
+                      ? "bg-primary/10 font-medium text-primary"
+                      : "text-muted hover:bg-surface hover:text-ink",
+                  ]}
+                >
+                  {page.title}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))
+  }
+</nav>

@@ -1,5 +1,7 @@
 ---
 import "@/styles/global.css";
+import Navbar from "@components/Navbar.astro";
+import Footer from "@components/Footer.astro";
 
 interface Props {
   title: string;
@@ -24,7 +26,11 @@ const { title, description = "Deployment orchestration and versioned artifacts f
     <meta name="generator" content={Astro.generator} />
     <title>{title} · Caatinga</title>
   </head>
-  <body class="min-h-screen antialiased">
-    <slot />
+  <body class="flex min-h-screen flex-col antialiased">
+    <Navbar />
+    <div class="flex-1">
+      <slot />
+    </div>
+    <Footer />
   </body>
 </html>

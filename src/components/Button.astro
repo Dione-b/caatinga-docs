@@ -1,4 +1,6 @@
 ---
+import { resolveHref } from "@/lib/url";
+
 interface Props {
   variant?: "primary" | "secondary" | "ghost";
   size?: "sm" | "md";
@@ -34,10 +36,11 @@ const sizes: Record<NonNullable<Props["size"]>, string> = {
 
 const classes = [base, variants[variant], sizes[size], className];
 const Tag = href ? "a" : "button";
+const resolvedHref = href ? resolveHref(href) : undefined;
 ---
 
 <Tag
-  href={href}
+  href={resolvedHref}
   type={href ? undefined : type}
   disabled={href ? undefined : disabled}
   class:list={classes}
