@@ -15,7 +15,7 @@ const stages: Stage[] = [
   {
     id: "init",
     name: "init",
-    command: "npx caatinga init my-dapp",
+    command: "npx ctg init my-dapp",
     purpose: "Scaffold a new Soroban project with caatinga.config.ts, contracts workspace, and ready-to-use tooling.",
     input: "Project name, template selection (react-vite-counter, minimal, zk-starter)",
     output: "my-dapp/ directory structure, caatinga.config.ts, contracts/",
@@ -24,7 +24,7 @@ const stages: Stage[] = [
   {
     id: "build",
     name: "build",
-    command: "npx caatinga build",
+    command: "npx ctg build",
     purpose: "Compile Rust smart contracts into optimized Soroban WebAssembly (.wasm) bytecode binaries.",
     input: "contracts/ Rust source code & caatinga.config.ts",
     output: "Optimized .wasm contract binaries in target output directory",
@@ -33,7 +33,7 @@ const stages: Stage[] = [
   {
     id: "deploy",
     name: "deploy",
-    command: "npx caatinga deploy --network testnet",
+    command: "npx ctg deploy --network testnet",
     purpose: "Deploy compiled WASM binaries to Stellar networks following dependency graph resolution.",
     input: "Compiled WASM binaries, network specs, identity alias (--source)",
     output: "Deployed Contract IDs & metadata in caatinga.artifacts.json",
@@ -42,7 +42,7 @@ const stages: Stage[] = [
   {
     id: "generate",
     name: "generate",
-    command: "npx caatinga generate",
+    command: "npx ctg generate",
     purpose: "Generate type-safe TypeScript client bindings directly from deployed contract artifacts.",
     input: "caatinga.artifacts.json contract definitions",
     output: "TypeScript bindings (src/contracts/*) with typed methods & XDR helpers",
@@ -51,7 +51,7 @@ const stages: Stage[] = [
   {
     id: "invoke",
     name: "invoke",
-    command: "npx caatinga invoke token transfer --arg to=G... --arg amount=1000",
+    command: "npx ctg invoke token transfer --arg to=G... --arg amount=1000",
     purpose: "Execute state-changing contract functions via signed Stellar network transactions.",
     input: "Contract name, function, typed arguments, signing identity",
     output: "On-chain transaction hash, event logs, and return value",
@@ -60,7 +60,7 @@ const stages: Stage[] = [
   {
     id: "read",
     name: "read",
-    command: "npx caatinga read token balance --arg id=G...",
+    command: "npx ctg read token balance --arg id=G...",
     purpose: "Simulate contract execution and query state without submitting on-chain transactions.",
     input: "Contract name, getter function name, query arguments",
     output: "Decoded JSON response with current contract state",

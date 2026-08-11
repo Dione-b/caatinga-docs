@@ -203,13 +203,13 @@ const shadows = [
       <Heading level={2}>Tabs</Heading>
       <Tabs>
         <Tab label="npm">
-          <Code block>npx caatinga init my-dapp</Code>
+          <Code block>npx ctg init my-dapp</Code>
         </Tab>
         <Tab label="pnpm">
-          <Code block>pnpm dlx caatinga init my-dapp</Code>
+          <Code block>pnpm dlx ctg init my-dapp</Code>
         </Tab>
         <Tab label="yarn">
-          <Code block>yarn dlx caatinga init my-dapp</Code>
+          <Code block>yarn dlx ctg init my-dapp</Code>
         </Tab>
       </Tabs>
     </section>
@@ -225,7 +225,7 @@ const shadows = [
       <p class="text-ink">
         Inline code like <Code>caatinga.config.ts</Code> reads naturally in a sentence.
       </p>
-      <Code block>{`caatinga deploy --network testnet --source alice`}</Code>
+      <Code block>{`ctg deploy --network testnet --source alice`}</Code>
     </section>
 
     <Divider />
@@ -247,10 +247,10 @@ const shadows = [
       </div>
 
       <Heading level={3} class="mt-4"> Command & Terminal </Heading>
-      <Command>caatinga doctor</Command>
+      <Command>ctg doctor</Command>
       <Terminal>
         {
-          `$ caatinga deploy --network testnet
+          `$ ctg deploy --network testnet
 Deploying contract...
 ✓ Deployed: CA1234...5678`
         }
@@ -258,21 +258,21 @@ Deploying contract...
 
       <Heading level={3} class="mt-4"> CodeTabs </Heading>
       <CodeTabs
-        npm="npx caatinga init my-dapp"
-        pnpm="pnpm dlx caatinga init my-dapp"
-        yarn="yarn dlx caatinga init my-dapp"
+        npm="npx ctg init my-dapp"
+        pnpm="pnpm dlx ctg init my-dapp"
+        yarn="yarn dlx ctg init my-dapp"
       />
 
       <Heading level={3} class="mt-4"> Steps </Heading>
       <Steps>
         <Step title="Create the project">
-          <Code block>caatinga init my-dapp</Code>
+          <Code block>ctg init my-dapp</Code>
         </Step>
         <Step title="Build">
-          <Code block>caatinga build</Code>
+          <Code block>ctg build</Code>
         </Step>
         <Step title="Deploy">
-          <Code block>caatinga deploy --network testnet</Code>
+          <Code block>ctg deploy --network testnet</Code>
         </Step>
       </Steps>
 
