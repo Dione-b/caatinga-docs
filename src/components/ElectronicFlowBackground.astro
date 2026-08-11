@@ -1,0 +1,120 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<div class={`absolute inset-0 pointer-events-none overflow-hidden select-none z-0 ${className}`}>
+  <!-- SVG Circuit / Electronic Flow Paths -->
+  <svg
+    class="w-full h-full opacity-25"
+    xmlns="http://www.w3.org/2000/svg"
+    width="100%"
+    height="100%"
+    viewBox="0 0 1200 800"
+    preserveAspectRatio="xMidYMid slice"
+  >
+    <defs>
+      <!-- Glow filter for nodes & pulses -->
+      <filter id="circuit-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="4" result="blur" />
+        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+      </filter>
+    </defs>
+
+    <!-- Grid / Bus background lines -->
+    <g stroke="#222222" stroke-width="1" stroke-dasharray="4 8">
+      <line x1="0" y1="150" x2="1200" y2="150" />
+      <line x1="0" y1="350" x2="1200" y2="350" />
+      <line x1="0" y1="550" x2="1200" y2="550" />
+      <line x1="200" y1="0" x2="200" y2="800" />
+      <line x1="600" y1="0" x2="600" y2="800" />
+      <line x1="1000" y1="0" x2="1000" y2="800" />
+    </g>
+
+    <!-- Main Circuit Traces -->
+    <g stroke="#333333" stroke-width="2" fill="none">
+      <!-- Trace A: Top flow -->
+      <path d="M 50,150 L 200,150 L 320,80 L 880,80 L 1000,150 L 1150,150" />
+      <!-- Trace B: Middle bus -->
+      <path d="M 0,350 L 180,350 L 280,250 L 920,250 L 1020,350 L 1200,350" />
+      <!-- Trace C: Bottom flow -->
+      <path d="M 80,650 L 350,650 L 450,550 L 750,550 L 850,650 L 1120,650" />
+      <!-- Vertical Interconnects -->
+      <path d="M 200,150 L 200,350" />
+      <path d="M 600,80 L 600,550" />
+      <path d="M 1000,150 L 1000,350" />
+    </g>
+
+    <!-- Circuit Nodes (Yellow Glowing Pins) -->
+    <g fill="#111111" stroke="#ffde00" stroke-width="2">
+      <circle cx="200" cy="150" r="5" filter="url(#circuit-glow)" />
+      <circle cx="320" cy="80" r="5" />
+      <circle cx="880" cy="80" r="5" />
+      <circle cx="600" cy="80" r="7" filter="url(#circuit-glow)" />
+      <circle cx="280" cy="250" r="5" />
+      <circle cx="920" cy="250" r="5" />
+      <circle cx="600" cy="250" r="6" filter="url(#circuit-glow)" />
+      <circle cx="450" cy="550" r="5" />
+      <circle cx="750" cy="550" r="5" filter="url(#circuit-glow)" />
+      <circle cx="1000" cy="350" r="5" />
+    </g>
+
+    <!-- Animated Data Pulses (Industrial Yellow #ffde00) -->
+    <g stroke="#ffde00" stroke-width="3" stroke-linecap="round" fill="none" filter="url(#circuit-glow)">
+      <!-- Pulse A -->
+      <path
+        d="M 50,150 L 200,150 L 320,80 L 880,80 L 1000,150 L 1150,150"
+        stroke-dasharray="120 1000"
+        class="animate-flow-fast"
+      />
+      <!-- Pulse B -->
+      <path
+        d="M 0,350 L 180,350 L 280,250 L 920,250 L 1020,350 L 1200,350"
+        stroke-dasharray="140 1100"
+        class="animate-flow-reverse"
+      />
+      <!-- Pulse C -->
+      <path
+        d="M 80,650 L 350,650 L 450,550 L 750,550 L 850,650 L 1120,650"
+        stroke-dasharray="100 900"
+        class="animate-flow-slow"
+      />
+      <!-- Vertical Pulses -->
+      <path
+        d="M 600,80 L 600,550"
+        stroke-dasharray="80 600"
+        class="animate-flow-vertical"
+      />
+    </g>
+  </svg>
+</div>
+
+<style>
+  @keyframes flowPulse {
+    0% {
+      stroke-dashoffset: 1200;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .animate-flow-fast {
+    animation: flowPulse 5s linear infinite;
+  }
+
+  .animate-flow-reverse {
+    animation: flowPulse 7s linear infinite reverse;
+  }
+
+  .animate-flow-slow {
+    animation: flowPulse 9s linear infinite;
+  }
+
+  .animate-flow-vertical {
+    animation: flowPulse 4s linear infinite;
+  }
+</style>

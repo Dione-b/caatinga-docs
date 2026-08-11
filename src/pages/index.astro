@@ -5,13 +5,16 @@ import Button from "@components/Button.astro";
 import Badge from "@components/Badge.astro";
 import Card from "@components/Card.astro";
 import WorkflowExplorer from "@components/WorkflowExplorer.vue";
+import ElectronicFlowBackground from "@components/ElectronicFlowBackground.astro";
 ---
 
 <Layout title="Deployment Orchestration & Versioned Artifacts for Soroban">
   <main class="flex flex-col gap-28 py-16">
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden">
-      <Container size="lg">
+    <!-- Hero Section with Electronic Flow Background -->
+    <section class="relative overflow-hidden py-12 border-b border-border/40">
+      <ElectronicFlowBackground />
+
+      <Container size="lg" class="relative z-10">
         <div class="flex flex-col items-center text-center gap-6 py-12">
           <div class="flex items-center gap-2">
             <Badge variant="primary">Documentation 2.0</Badge>
@@ -77,13 +80,13 @@ import WorkflowExplorer from "@components/WorkflowExplorer.vue";
           </div>
 
           <div class="flex flex-col gap-5 lg:col-span-5">
-            <Card class="p-6">
+            <Card class="p-6 w-full">
               <h3 class="font-semibold text-ink text-xl mb-2">Deterministic Artifacts</h3>
               <p class="text-muted leading-relaxed">
                 Track every WASM hash, network deployment, contract ID, and upgrade history in version-controlled JSON artifacts.
               </p>
             </Card>
-            <Card class="p-6">
+            <Card class="p-6 w-full">
               <h3 class="font-semibold text-ink text-xl mb-2">TypeScript-Native Binding Generation</h3>
               <p class="text-muted leading-relaxed">
                 Automatically generate strongly-typed TypeScript client packages directly from deployed contract specs.
@@ -240,3 +243,4 @@ import WorkflowExplorer from "@components/WorkflowExplorer.vue";
     </section>
   </main>
 </Layout>
+
