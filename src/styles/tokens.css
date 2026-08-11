@@ -121,19 +121,20 @@
   }
 
   .docs-content h1 {
-    font-size: 2.4rem;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
     color: #ffffff;
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.25rem;
+    overflow-wrap: break-word;
   }
 
   /* Section dividers — solid yellow block on the left */
   .docs-content h2 {
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
     color: #ffffff;
-    margin-top: 3rem;
-    margin-bottom: 1.25rem;
-    padding: 0.6rem 0 0.6rem 1rem;
+    margin-top: 2.25rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0 0.5rem 0.85rem;
     border-left: 4px solid #ffde00;
     background: #111111;
   }
@@ -145,9 +146,9 @@
     font-style: normal;
     text-transform: none;
     letter-spacing: -0.01em;
-    font-size: 1.25rem;
+    font-size: clamp(1.1rem, 2.5vw, 1.25rem);
     color: #ffffff;
-    margin-top: 2rem;
+    margin-top: 1.75rem;
     margin-bottom: 0.75rem;
   }
 
@@ -170,10 +171,17 @@
     line-height: 1.7;
   }
 
+  .docs-content img,
+  .docs-content svg {
+    max-width: 100%;
+    height: auto;
+  }
+
   .docs-content a {
     color: #ffde00;
     text-decoration: underline;
     text-underline-offset: 3px;
+    word-break: break-word;
   }
 
   .docs-content a:hover {
@@ -202,21 +210,28 @@
     border-radius: 999px;
     padding: 0.15em 0.65em;
     font-weight: 500;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
-  /* Tables */
+  /* Tables — mobile scrollable container */
   .docs-content table {
-    border-collapse: collapse;
+    display: block;
     width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
     margin: 1.5rem 0;
     border: 1px solid #333333;
     background: #000000;
+    -webkit-overflow-scrolling: touch;
   }
 
   .docs-content th,
   .docs-content td {
     border: 1px solid #333333;
     padding: 0.6rem 1rem;
+    white-space: nowrap;
   }
 
   .docs-content th {
@@ -233,6 +248,7 @@
   }
 
   /* Code blocks — hard-edged terminal panels */
+  .docs-content pre,
   .astro-code {
     border-radius: 0 !important;
     border: 2px solid #333333;
@@ -242,6 +258,8 @@
     font-family: var(--font-mono);
     font-size: 0.875rem;
     line-height: 1.65;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 

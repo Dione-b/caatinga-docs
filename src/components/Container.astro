@@ -15,6 +15,6 @@ const widths: Record<NonNullable<Props["size"]>, string> = {
 };
 ---
 
-<div class:list={["mx-auto w-full px-6 sm:px-8", widths[size], className]}>
+<div class:list={["mx-auto w-full px-4 sm:px-6 md:px-8", widths[size], className]}>
   <slot />
 </div>

@@ -86,10 +86,10 @@ function copyCommand() {
 </script>
 
 <template>
-  <div class="w-full rounded-xl border border-border bg-surface p-6 shadow-md transition-all">
+  <div class="w-full rounded-xl border border-border bg-surface p-4 sm:p-6 shadow-md transition-all">
     <div class="mb-4 flex flex-col gap-1">
-      <h3 class="text-lg font-semibold text-ink">Interactive Workflow Pipeline</h3>
-      <p class="text-sm text-muted">
+      <h3 class="text-base sm:text-lg font-semibold text-ink">Interactive Workflow Pipeline</h3>
+      <p class="text-xs sm:text-sm text-muted">
         Click through the Caatinga execution stages to see how orchestration flows from init to read.
       </p>
     </div>
@@ -101,51 +101,51 @@ function copyCommand() {
         :key="stage.id"
         @click="selectStage(stage)"
         :class="[
-          'flex flex-col items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all cursor-pointer',
+          'flex flex-col items-center justify-center rounded-lg border p-2.5 sm:p-3 text-xs sm:text-sm font-medium transition-all cursor-pointer',
           activeStage.id === stage.id
             ? 'border-primary bg-primary/10 text-primary shadow-sm font-bold scale-[1.02]'
             : 'border-border bg-bg/50 text-muted hover:border-border/80 hover:text-ink',
         ]"
       >
-        <span class="text-xs text-muted mb-0.5">0{{ idx + 1 }}</span>
-        <span class="font-mono">{{ stage.name }}</span>
+        <span class="text-[10px] sm:text-xs text-muted mb-0.5">0{{ idx + 1 }}</span>
+        <span class="font-mono text-xs sm:text-sm">{{ stage.name }}</span>
       </button>
     </div>
 
     <!-- Stage Detail View -->
-    <div class="rounded-lg border border-border bg-bg p-5 flex flex-col gap-4">
+    <div class="rounded-lg border border-border bg-bg p-4 sm:p-5 flex flex-col gap-4">
       <!-- Command block -->
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Command</span>
           <button
             @click="copyCommand"
-            class="text-xs font-mono text-muted hover:text-primary transition-colors cursor-pointer flex items-center gap-1"
+            class="text-xs font-mono text-muted hover:text-primary transition-colors cursor-pointer flex items-center gap-1 shrink-0"
           >
             <span v-if="copied" class="text-success font-semibold">✓ Copied</span>
             <span v-else>Copy</span>
           </button>
         </div>
-        <div class="rounded-md border border-border bg-surface/80 px-4 py-3 font-mono text-sm text-ink flex items-center justify-between overflow-x-auto">
-          <code>{{ activeStage.command }}</code>
+        <div class="rounded-md border border-border bg-surface/80 px-3 py-2.5 sm:px-4 sm:py-3 font-mono text-xs sm:text-sm text-ink flex items-center justify-between overflow-x-auto min-w-0">
+          <code class="whitespace-pre-wrap break-all sm:whitespace-normal sm:break-normal">{{ activeStage.command }}</code>
         </div>
       </div>
 
       <!-- Purpose, Input, Output -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-border/50">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-border/50">
         <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Purpose</span>
-          <p class="text-sm text-ink leading-relaxed">{{ activeStage.purpose }}</p>
+          <p class="text-xs sm:text-sm text-ink leading-relaxed">{{ activeStage.purpose }}</p>
         </div>
 
         <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Input</span>
-          <p class="text-sm text-muted font-mono leading-relaxed">{{ activeStage.input }}</p>
+          <p class="text-xs sm:text-sm text-muted font-mono leading-relaxed break-words">{{ activeStage.input }}</p>
         </div>
 
         <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Output</span>
-          <p class="text-sm text-muted font-mono leading-relaxed">{{ activeStage.output }}</p>
+          <p class="text-xs sm:text-sm text-muted font-mono leading-relaxed break-words">{{ activeStage.output }}</p>
         </div>
       </div>
     </div>
