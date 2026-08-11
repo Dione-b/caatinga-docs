@@ -8,8 +8,8 @@ import icon from "astro-icon";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://dione-b.github.io",
-  base: "/caatinga-docs/",
+  site: process.env.NETLIFY ? "https://docs-caatinga.netlify.app" : "https://dione-b.github.io",
+  base: process.env.NETLIFY ? "/" : "/caatinga-docs/",
   integrations: [mdx(), vue(), icon()],
 
   markdown: {
