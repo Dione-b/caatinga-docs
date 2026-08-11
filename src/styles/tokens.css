@@ -120,6 +120,15 @@
     line-height: 1.1;
   }
 
+  .docs-content h1,
+  .docs-content h2,
+  .docs-content h3,
+  .docs-content h4,
+  .docs-content h5,
+  .docs-content h6 {
+    scroll-margin-top: 5rem;
+  }
+
   .docs-content h1 {
     font-size: clamp(1.5rem, 5vw, 2.4rem);
     color: #ffffff;

@@ -94,6 +94,13 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
     );
 
     targets.forEach((target) => observer.observe(target));
+
+    links.forEach((link) => {
+      link.addEventListener("click", () => {
+        const details = link.closest("details");
+        if (details) details.open = false;
+      });
+    });
   }
 
   initTocScrollspy();

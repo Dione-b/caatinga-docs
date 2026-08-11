@@ -34,3 +34,35 @@ const { title, description, headings = [] } = Astro.props as Props;
     <TableOfContents headings={headings} variant="desktop" />
   </div>
 </Layout>
+
+<script>
+  function setupDocsCodeCopy() {
+    const codeBlocks = document.querySelectorAll<HTMLPreElement>(".docs-content pre");
+    codeBlocks.forEach((pre) => {
+      if (pre.dataset.hasCopyBtn) return;
+      pre.dataset.hasCopyBtn = "true";
+      pre.classList.add("relative", "group");
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className =
+        "absolute top-2 right-2 hidden group-hover:flex items-center gap-1 rounded bg-surface/90 border border-border px-2 py-1 text-xs font-mono text-muted hover:text-ink hover:border-primary transition-all cursor-pointer z-10";
+      button.innerText = "Copy";
+
+      button.addEventListener("click", () => {
+        const code = pre.querySelector("code")?.innerText || pre.innerText;
+        navigator.clipboard.writeText(code.trim());
+        button.innerText = "✓ Copied";
+        button.classList.add("text-success");
+        setTimeout(() => {
+          button.innerText = "Copy";
+          button.classList.remove("text-success");
+        }, 2000);
+      });
+
+      pre.appendChild(button);
+    });
+  }
+
+  setupDocsCodeCopy();
+</script>

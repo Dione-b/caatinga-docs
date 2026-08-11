@@ -4,6 +4,11 @@
 @import "@fontsource-variable/jetbrains-mono";
 @import "./tokens.css";
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg);
