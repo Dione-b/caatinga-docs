@@ -6,9 +6,9 @@ interface Props {
 const { class: className } = Astro.props as Props;
 ---
 
-<div class:list={["tabs", className]} data-tabs>
-  <div class="tabs-list flex gap-1 border-b border-border" role="tablist"></div>
-  <div class="tabs-panels mt-4">
+<div class:list={["tabs w-full overflow-hidden", className]} data-tabs>
+  <div class="tabs-list flex gap-1 border-b border-border overflow-x-auto min-w-0" role="tablist"></div>
+  <div class="tabs-panels mt-4 max-w-full">
     <slot />
   </div>
 </div>
@@ -28,7 +28,7 @@ const { class: className } = Astro.props as Props;
       button.setAttribute("role", "tab");
       button.textContent = panel.dataset.label ?? `Tab ${index + 1}`;
       button.className =
-        "border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink aria-selected:border-primary aria-selected:text-ink";
+        "shrink-0 whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink aria-selected:border-primary aria-selected:text-ink";
       button.setAttribute("aria-selected", String(index === 0));
       button.tabIndex = index === 0 ? 0 : -1;
       list.appendChild(button);

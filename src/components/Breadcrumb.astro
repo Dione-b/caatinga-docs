@@ -5,7 +5,7 @@ import { resolveHref } from "@/lib/url";
 const trail = await getBreadcrumb(Astro.url.pathname);
 ---
 
-<nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-1.5 text-sm text-muted">
+<nav aria-label="Breadcrumb" class="mb-4 sm:mb-6 flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-muted">
   {
     trail.map((item, index) => (
       <>

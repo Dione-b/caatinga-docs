@@ -1,0 +1,37 @@
+---
+interface Props {
+  src: string;
+  autoplay?: boolean;
+  loop?: boolean;
+  speed?: number;
+  class?: string;
+  style?: string;
+}
+
+const {
+  src,
+  autoplay = true,
+  loop = true,
+  speed = 1,
+  class: className = "w-48 h-48",
+  style = "",
+} = Astro.props;
+---
+
+<div class={`relative flex items-center justify-center ${className}`} style={style}>
+  <dotlottie-wc
+    src={src}
+    autoplay={autoplay ? "true" : "false"}
+    loop={loop ? "true" : "false"}
+    speed={speed}
+    background="transparent"
+    style="width: 100%; height: 100%;"
+  >
+  </dotlottie-wc>
+</div>
+
+<script>
+  if (!customElements.get("dotlottie-wc")) {
+    import("@lottiefiles/dotlottie-wc");
+  }
+</script>

@@ -12,25 +12,36 @@ Description: Index of all Caatinga CLI commands and options.
 
 # Caatinga CLI Reference
 
-The Caatinga CLI (`@caatinga/cli`) provides commands for every stage of smart contract development, from initialization to testing and upgrades.
+The Caatinga CLI (`@caatinga/cli`) provides commands for every stage of smart contract development, from initialization to testing and upgrades. The binary is invoked as `ctg`.
+
+## Canonical Workflow
+
+```text
+init → doctor → build → deploy → generate → read / invoke → browser
+```
+
+Run `ctg doctor` before changing deploy state or troubleshooting the environment.
 
 ## Command Matrix
 
 | Command | Description | Common Flags |
 | :--- | :--- | :--- |
-| **`caatinga setup`** | Interactive environment & dependency check | `--verbose` |
-| **`caatinga init`** | Scaffold new Soroban project | `<name>`, `--template` |
-| **`caatinga doctor`** | Health check of toolchain & config | None |
-| **`caatinga build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
-| **`caatinga deploy`** | Deploy WASM binaries following DAG | `--network`, `--source` |
-| **`caatinga generate`** | Generate TS client bindings | `--output` |
-| **`caatinga invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg` |
-| **`caatinga read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg` |
-| **`caatinga status`** | Display deployed contract state & network history | `--network` |
-| **`caatinga upgrade`** | Upgrade contract WASM in-place or redeploy | `--contract`, `--upgrade` |
-| **`caatinga rollback`** | Rollback contract artifacts to previous version | `--contract`, `--version` |
-| **`caatinga smoke`** | Run post-deployment smoke tests | `--network` |
-| **`caatinga ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
+| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template` |
+| **`ctg doctor`** | Health check of toolchain & config | `--strict`, `--strict-env`, `--strict-bindings` |
+| **`ctg build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
+| **`ctg deploy`** | Deploy WASM binaries following DAG | `--network`, `--source`, `--upgrade`, `--if-changed`, `--no-generate`, `--no-wire`, `--no-sync-env` |
+| **`ctg upgrade`** | In-place WASM upgrade on existing instance | `--network`, `--source`, `--if-changed`, `--no-build`, `--generate` |
+| **`ctg wire`** | Execute `postDeploy` hooks after deployment | `--network`, `--source` |
+| **`ctg sync-env`** | Sync deployed contract IDs to `frontend.env` | `--network` |
+| **`ctg generate`** | Generate TS client bindings | `--output`, `--network` |
+| **`ctg status`** | Display deployed contract state & binding freshness | `--network`, `--strict` |
+| **`ctg invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg`, `--source` |
+| **`ctg read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg`, `--expect`, `--summary`, `--quiet` |
+| **`ctg smoke`** | Run post-deployment smoke tests | `--network` |
+| **`ctg regression`** | Local CI recipe: test → build → deploy → generate → smoke | `--network`, `--source` |
+| **`ctg ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
+| **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import` |
+| **`ctg zk`** | Circom Groth16 ZK proof helpers | `--allow-dev-ceremony` |
 
 
 ---
@@ -53,7 +64,7 @@ Managing signing keys and identities is critical for secure deployment pipelines
 Export a configured Stellar identity alias into an encrypted payload for CI/CD environments.
 
 ```bash
-npx caatinga identity export --source alice --out alice-identity.json
+npx ctg identity export --source alice --out alice-identity.json
 ```
 
 **Flags:**
@@ -67,7 +78,7 @@ npx caatinga identity export --source alice --out alice-identity.json
 Import a previously exported identity bundle into a local environment or CI runner.
 
 ```bash
-npx caatinga identity import --in alice-identity.json
+npx ctg identity import --in alice-identity.json
 ```
 
 **Flags:**
@@ -277,7 +288,7 @@ export default defineConfig({
 
 ## Graph Resolution & Order
 
-When you execute `npx caatinga deploy`, Caatinga resolves the graph:
+When you execute `npx ctg deploy`, Caatinga resolves the graph:
 
 ```text
 token
@@ -477,19 +488,19 @@ Without an orchestrator, developers often write custom scripts or manually copy 
 
 
   #### Step: Initialize Project
-    Run `npx caatinga init my-dapp` to scaffold a project with `caatinga.config.ts`.
+    Run `npx ctg init my-dapp` to scaffold a project with `caatinga.config.ts`.
   
   #### Step: Build Contracts
-    Compile Rust contracts using `npx caatinga build`.
+    Compile Rust contracts using `npx ctg build`.
   
   #### Step: Deploy & Graph Resolution
-    Deploy contracts in topological dependency order using `npx caatinga deploy`.
+    Deploy contracts in topological dependency order using `npx ctg deploy`.
   
   #### Step: Generate Bindings
-    Instantly produce TypeScript client bindings via `npx caatinga generate`.
+    Instantly produce TypeScript client bindings via `npx ctg generate`.
   
   #### Step: Invoke & Read
-    Interact with your contract state using `caatinga invoke` and `caatinga read`.
+    Interact with your contract state using `ctg invoke` and `ctg read`.
   
 
 
@@ -525,7 +536,7 @@ Before using Caatinga, ensure your environment meets the prerequisites for Node.
 | **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
 | **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
 | **Rust toolchain** | `1.80+` | `stable` | Target `wasm32-unknown-unknown` |
-| **Stellar CLI** | `21.0.0+` | Latest release | Used under the hood for WASM operations |
+| **Stellar CLI** | `23.0.0+` | Latest release | Used under the hood for WASM operations |
 
 ## Rust & WASM Setup
 
@@ -555,7 +566,7 @@ cargo install --locked stellar-cli --features opt
 ```
 
 <Warning>
-  Caatinga validates the presence of Stellar CLI before executing builds or deploys. Run `npx caatinga doctor` to verify your local setup.
+  Caatinga validates the presence of Stellar CLI before executing builds or deploys. Run `npx ctg doctor` to verify your local setup.
 </Warning>
 
 
@@ -572,10 +583,10 @@ Caatinga can be executed directly without global installation via `npx` or insta
 
 ## Direct Execution (Recommended)
 
-You can run any Caatinga command using `npx`:
+You can run any Caatinga command using `npx` with the `ctg` binary:
 
 ```bash
-npx caatinga --help
+npx ctg --help
 ```
 
 ## Local Installation
@@ -602,10 +613,10 @@ Add `@caatinga/cli` to your project's dev dependencies:
 
 ## Verifying Setup with Doctor
 
-Run `caatinga doctor` to run system checks against your environment:
+Run `ctg doctor` to run system checks against your environment:
 
 ```bash
-npx caatinga doctor
+npx ctg doctor
 ```
 
 Output:
@@ -634,7 +645,7 @@ This step-by-step guide walks you through the complete lifecycle of a Soroban pr
 Initialize a new project using the default `react-vite-counter` template:
 
 ```bash
-npx caatinga init my-dapp
+npx ctg init my-dapp
 cd my-dapp
 npm install
 ```
@@ -644,7 +655,7 @@ npm install
 Verify your toolchain and dependencies:
 
 ```bash
-npx caatinga doctor
+npx ctg doctor
 ```
 
 ## Step 3: Build Smart Contracts
@@ -652,7 +663,7 @@ npx caatinga doctor
 Compile the Rust contracts in `contracts/`:
 
 ```bash
-npx caatinga build
+npx ctg build
 ```
 
 This compiles your contracts and generates `.wasm` binaries.
@@ -662,7 +673,7 @@ This compiles your contracts and generates `.wasm` binaries.
 Deploy your contracts using your configured network and Stellar identity:
 
 ```bash
-npx caatinga deploy --network testnet --source alice
+npx ctg deploy --network testnet --source alice
 ```
 
 Caatinga resolves dependencies, deploys the WASM binaries on-chain, and writes contract metadata to `caatinga.artifacts.json`.
@@ -672,84 +683,20 @@ Caatinga resolves dependencies, deploys the WASM binaries on-chain, and writes c
 Generate TypeScript bindings for your frontend:
 
 ```bash
-npx caatinga generate
+npx ctg generate
 ```
 
 Now invoke contract functions directly:
 
 ```bash
-npx caatinga invoke counter increment --source alice
+npx ctg invoke counter increment --source alice
 ```
 
 Read the updated balance/counter state:
 
 ```bash
-npx caatinga read counter value
+npx ctg read counter value
 ```
-
-
----
-
-## Section: Error Reference
-
-Path: /docs/reference/errors
-Description: Searchable public error code reference for CAATINGA_* machine-readable error codes.
-
-# Error Reference (`CAATINGA_*`)
-
-Caatinga enforces machine-readable error codes for automation, CI pipelines, and programatic CLI integration.
-
-When a command fails, Caatinga returns a structured error payload containing the error code, category, description, and resolution instructions.
-
----
-
-## Error Catalog
-
-### `CAATINGA_CONFIG_NOT_FOUND`
-- **Category**: Configuration
-- **Description**: `caatinga.config.ts` was not found in the root directory.
-- **Common Causes**: Running commands outside a Caatinga workspace root.
-- **How to Fix**: Run `npx caatinga init` or navigate to your project root containing `caatinga.config.ts`.
-
----
-
-### `CAATINGA_CONFIG_CYCLE_DETECTED`
-- **Category**: Dependency Graph
-- **Description**: Circular dependency detected during contract graph resolution.
-- **Common Causes**: Contract A depends on Contract B while Contract B depends on Contract A in `dependsOn`.
-- **How to Fix**: Inspect contract `dependsOn` declarations and refactor circular relationships.
-
----
-
-### `CAATINGA_BUILD_FAILED`
-- **Category**: Compilation
-- **Description**: Cargo/rustc failed to compile contract WASM binaries.
-- **Common Causes**: Rust compilation errors, missing dependencies, or incompatible Soroban SDK versions.
-- **How to Fix**: Check the Rust compiler output in stderr and run `cargo check` inside the contract crate directory.
-
----
-
-### `CAATINGA_DEPLOY_FAILED`
-- **Category**: Deployment
-- **Description**: Deployment failed during Stellar network execution.
-- **Common Causes**: Insufficient account balance for fees, invalid identity alias, or network RPC timeout.
-- **How to Fix**: Verify `npx caatinga doctor`, check account funds on Testnet/Mainnet, and ensure `--source` alias exists.
-
----
-
-### `CAATINGA_SOURCE_INVALID_KEY`
-- **Category**: Security / Identity
-- **Description**: `--source` parameter contained a raw key (`G...`, `S...`) or secret phrase instead of a Stellar CLI identity alias.
-- **Common Causes**: Passing raw Stellar secret key or public key to CLI.
-- **How to Fix**: Use an identity alias (e.g. `--source alice`). See [CLI Identity Reference](/docs/cli/identity).
-
----
-
-### `CAATINGA_ARTIFACT_NOT_FOUND`
-- **Category**: Artifacts
-- **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.
-- **Common Causes**: Attempting `caatinga invoke` or `caatinga generate` before running `caatinga deploy`.
-- **How to Fix**: Run `npx caatinga deploy --network <network>` to generate artifacts.
 
 
 ---
@@ -778,10 +725,74 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 
 ## Release & Versioning Policy
 
-- **Dist Tags**: `latest` (v3.6.1) / `next` (v3.8.0).
+- **Dist Tags**: `latest` (v3.8.0) / `next` (v3.9.1).
 - **Status**: Alpha (pre-1.0). The `3.x` major version does **not** imply API stability yet.
-- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.6.1`) rather than floating tags.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.8.0`) rather than floating tags.
 - **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.
+
+
+---
+
+## Section: Error Reference
+
+Path: /docs/reference/errors
+Description: Searchable public error code reference for CAATINGA_* machine-readable error codes.
+
+# Error Reference (`CAATINGA_*`)
+
+Caatinga enforces machine-readable error codes for automation, CI pipelines, and programatic CLI integration.
+
+When a command fails, Caatinga returns a structured error payload containing the error code, category, description, and resolution instructions.
+
+---
+
+## Error Catalog
+
+### `CAATINGA_CONFIG_NOT_FOUND`
+- **Category**: Configuration
+- **Description**: `caatinga.config.ts` was not found in the root directory.
+- **Common Causes**: Running commands outside a Caatinga workspace root.
+- **How to Fix**: Run `npx ctg init` or navigate to your project root containing `caatinga.config.ts`.
+
+---
+
+### `CAATINGA_CONFIG_CYCLE_DETECTED`
+- **Category**: Dependency Graph
+- **Description**: Circular dependency detected during contract graph resolution.
+- **Common Causes**: Contract A depends on Contract B while Contract B depends on Contract A in `dependsOn`.
+- **How to Fix**: Inspect contract `dependsOn` declarations and refactor circular relationships.
+
+---
+
+### `CAATINGA_BUILD_FAILED`
+- **Category**: Compilation
+- **Description**: Cargo/rustc failed to compile contract WASM binaries.
+- **Common Causes**: Rust compilation errors, missing dependencies, or incompatible Soroban SDK versions.
+- **How to Fix**: Check the Rust compiler output in stderr and run `cargo check` inside the contract crate directory.
+
+---
+
+### `CAATINGA_DEPLOY_FAILED`
+- **Category**: Deployment
+- **Description**: Deployment failed during Stellar network execution.
+- **Common Causes**: Insufficient account balance for fees, invalid identity alias, or network RPC timeout.
+- **How to Fix**: Verify `npx ctg doctor`, check account funds on Testnet/Mainnet, and ensure `--source` alias exists.
+
+---
+
+### `CAATINGA_SOURCE_INVALID_KEY`
+- **Category**: Security / Identity
+- **Description**: `--source` parameter contained a raw key (`G...`, `S...`) or secret phrase instead of a Stellar CLI identity alias.
+- **Common Causes**: Passing raw Stellar secret key or public key to CLI.
+- **How to Fix**: Use an identity alias (e.g. `--source alice`). See [CLI Identity Reference](/docs/cli/identity).
+
+---
+
+### `CAATINGA_ARTIFACT_NOT_FOUND`
+- **Category**: Artifacts
+- **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.
+- **Common Causes**: Attempting `ctg invoke` or `ctg generate` before running `ctg deploy`.
+- **How to Fix**: Run `npx ctg deploy --network <network>` to generate artifacts.
 
 
 ---

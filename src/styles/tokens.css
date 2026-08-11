@@ -1,14 +1,11 @@
-/* Design tokens — Caatinga Docs 2.0 (Sprint 2)
-   Dark is the default theme; light overrides live under [data-theme="light"].
-   Palette verified for WCAG contrast — see ROADMAP.md / PRODUCT.md for the brief. */
+/* Design tokens — Caatinga Docs 2.0 (Brutalist CLI Theme matching caatinga repo) */
 
 @theme {
-  --font-sans:
-    "Plus Jakarta Sans Variable", "Inter Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono:
-    "Fira Code Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  --font-display: "Anton", Impact, "Arial Narrow Bold", sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
 
-  /* Fixed rem scale, tight ratio (~1.15-1.25) per product register */
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.5;
   --text-sm: 0.8125rem;
@@ -26,76 +23,72 @@
   --text-4xl: 2.25rem;
   --text-4xl--line-height: 1.15;
 
-  /* Cards top out at 12-16px; pills use the default full radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
+  /* Hard edges across the design system */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
 
-  /* Tuned for a near-black default surface; light theme overrides below */
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
-  --shadow-md: 0 8px 24px -4px oklch(0 0 0 / 0.55);
-  --shadow-lg: 0 16px 48px -8px oklch(0 0 0 / 0.65);
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
 
-  /* Dark theme (default) */
-  --color-bg: oklch(0.07 0 0);
-  --color-surface: oklch(0.2 0.014 248);
-  --color-border: oklch(0.32 0.016 248);
-  --color-ink: oklch(0.95 0.004 248);
-  --color-muted: oklch(0.65 0.012 248);
+  /* Dark-only Brutalist CLI Palette */
+  --color-bg: #000000;
+  --color-surface: #111111;
+  --color-surface-alt: #1a1a1a;
+  --color-border: #333333;
+  --color-divider: #222222;
 
-  --color-primary: oklch(0.52 0.16 248);
-  --color-primary-hover: oklch(0.55 0.17 248);
-  --color-on-primary: oklch(1 0 0);
+  --color-ink: #ffffff;
+  --color-text-body: #cccccc;
+  --color-muted: #999999;
 
-  --color-accent: oklch(0.86 0.1 195);
-  --color-on-accent: oklch(0.19 0.014 248);
+  /* Industrial Yellow brand colors */
+  --color-primary: #ffde00;
+  --color-primary-hover: #e6c800;
+  --color-primary-active: #ccb300;
+  --color-on-primary: #000000;
+  --color-primary-soft: rgba(255, 222, 0, 0.12);
 
-  --color-success: oklch(0.75 0.16 145);
-  --color-success-fill: oklch(0.55 0.15 145);
-  --color-on-success-fill: oklch(1 0 0);
+  --color-accent: #ffde00;
+  --color-on-accent: #000000;
 
-  --color-warning: oklch(0.78 0.15 80);
-  --color-warning-fill: oklch(0.75 0.15 80);
-  --color-on-warning-fill: oklch(0 0 0);
+  --color-success: #ffde00;
+  --color-success-fill: #111111;
+  --color-on-success-fill: #ffffff;
 
-  --color-danger: oklch(0.68 0.19 25);
-  --color-danger-fill: oklch(0.55 0.19 25);
-  --color-on-danger-fill: oklch(1 0 0);
+  --color-warning: #ffde00;
+  --color-warning-fill: #111111;
+  --color-on-warning-fill: #ffffff;
+
+  --color-danger: #ff4444;
+  --color-danger-fill: #111111;
+  --color-on-danger-fill: #ffffff;
 }
 
-:root[data-theme="light"] {
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.06);
-  --shadow-md: 0 8px 24px -4px oklch(0 0 0 / 0.12);
-  --shadow-lg: 0 16px 48px -8px oklch(0 0 0 / 0.18);
-
-  --color-bg: oklch(1 0 0);
-  --color-surface: oklch(0.95 0.007 248);
-  --color-border: oklch(0.87 0.011 248);
-  --color-ink: oklch(0.19 0.014 248);
-  --color-muted: oklch(0.5 0.014 248);
-
-  --color-primary: oklch(0.38 0.16 248);
-  --color-primary-hover: oklch(0.32 0.16 248);
-  --color-on-primary: oklch(1 0 0);
-
-  --color-accent: oklch(0.5 0.13 195);
-  --color-on-accent: oklch(1 0 0);
-
-  --color-success: oklch(0.45 0.15 145);
-  --color-success-fill: oklch(0.42 0.14 145);
-  --color-on-success-fill: oklch(1 0 0);
-
-  --color-warning: oklch(0.52 0.15 80);
-  --color-warning-fill: oklch(0.78 0.15 80);
-  --color-on-warning-fill: oklch(0 0 0);
-
-  --color-danger: oklch(0.5 0.19 25);
-  --color-danger-fill: oklch(0.5 0.19 25);
-  --color-on-danger-fill: oklch(1 0 0);
-}
-
-/* Semantic z-index scale — reference directly, e.g. z-(--z-modal) */
 :root {
+  /* Brand / CTA — industrial yellow */
+  --vp-c-brand-1: #ffde00;
+  --vp-c-brand-2: #e6c800;
+  --vp-c-brand-3: #ccb300;
+  --vp-c-brand-soft: rgba(255, 222, 0, 0.12);
+
+  /* Backgrounds — pure black / graphite */
+  --vp-c-bg: #000000;
+  --vp-c-bg-alt: #111111;
+  --vp-c-bg-soft: #111111;
+  --vp-c-bg-elv: #111111;
+
+  /* Text — white / light gray */
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: #cccccc;
+  --vp-c-text-3: #999999;
+
+  /* Borders & dividers */
+  --vp-c-border: #333333;
+  --vp-c-divider: #333333;
+  --vp-c-gutter: #222222;
+
   --z-dropdown: 20;
   --z-sticky: 30;
   --z-modal-backdrop: 40;
@@ -115,71 +108,167 @@
     text-wrap: pretty;
   }
 
-  /* Markdown/MDX-rendered content — smooth typography for references */
-  .docs-content h1 {
-    @apply text-3xl font-bold tracking-tight text-ink mb-4;
-  }
-
+  /* Display Titles (Anton, uppercase) */
+  .hero-title,
+  .display-title,
+  .docs-content h1,
   .docs-content h2 {
-    @apply text-xl font-semibold tracking-tight text-ink mt-8 mb-3 border-b border-border/40 pb-2;
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
   }
 
+  .docs-content h1,
+  .docs-content h2,
+  .docs-content h3,
+  .docs-content h4,
+  .docs-content h5,
+  .docs-content h6 {
+    scroll-margin-top: 5rem;
+  }
+
+  .docs-content h1 {
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    color: #ffffff;
+    margin-top: 1.5rem;
+    margin-bottom: 1.25rem;
+    overflow-wrap: break-word;
+  }
+
+  /* Section dividers — solid yellow block on the left */
+  .docs-content h2 {
+    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+    color: #ffffff;
+    margin-top: 2.25rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0 0.5rem 0.85rem;
+    border-left: 4px solid #ffde00;
+    background: #111111;
+  }
+
+  /* Subtitles and headings */
   .docs-content h3 {
-    @apply text-lg font-medium tracking-tight text-ink mt-6 mb-2;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.1rem, 2.5vw, 1.25rem);
+    color: #ffffff;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
   }
 
-  .docs-content p {
-    @apply text-muted leading-relaxed mb-4 text-base font-normal;
+  .docs-content h4,
+  .docs-content h5,
+  .docs-content h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: #ffffff;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Body text */
+  .docs-content p,
+  .docs-content li,
+  .docs-content td,
+  .docs-content th {
+    color: #cccccc;
+    line-height: 1.7;
+  }
+
+  .docs-content img,
+  .docs-content svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .docs-content a {
+    color: #ffde00;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    word-break: break-word;
+  }
+
+  .docs-content a:hover {
+    color: #ffffff;
   }
 
   .docs-content ul {
-    @apply list-disc pl-5 text-muted leading-relaxed mb-4 space-y-1;
+    list-style-type: disc;
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .docs-content ol {
-    @apply list-decimal pl-5 text-muted leading-relaxed mb-4 space-y-1;
+    list-style-type: decimal;
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
   }
 
-  .docs-content :not(pre) > code {
-    @apply rounded-md border border-border bg-surface px-1.5 py-0.5 text-[0.85em] font-mono text-ink font-normal;
+  /* Inline code — pill tags emulating CLI parameters */
+  .docs-content :not(pre, h1, h2, h3, h4, h5, h6) > code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: #ffde00;
+    background: #1a1a1a;
+    border: 1px solid #333333;
+    border-radius: 999px;
+    padding: 0.15em 0.65em;
+    font-weight: 500;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
-  /* Smooth, modern reference table styling */
+  /* Tables — mobile scrollable container */
   .docs-content table {
-    @apply w-full border-collapse rounded-lg overflow-hidden border border-border bg-surface/40 my-6 text-sm text-left;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    border: 1px solid #333333;
+    background: #000000;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .docs-content th,
+  .docs-content td {
+    border: 1px solid #333333;
+    padding: 0.6rem 1rem;
+    white-space: nowrap;
   }
 
   .docs-content th {
-    @apply border-b border-border bg-surface/80 px-4 py-3 font-semibold text-ink text-xs uppercase tracking-wider;
+    background: #111111;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: #ffde00;
   }
 
-  .docs-content td {
-    @apply border-b border-border/50 px-4 py-3 text-muted align-top leading-relaxed font-normal;
+  .docs-content tr:nth-child(even) {
+    background: #0a0a0a;
   }
 
-  .docs-content tr:last-child td {
-    @apply border-b-0;
-  }
-
-  .docs-content tr:hover td {
-    @apply bg-surface/60 text-ink transition-colors;
-  }
-
-  /* Shiki dual-theme (markdown.shikiConfig.defaultColor: false) */
+  /* Code blocks — hard-edged terminal panels */
+  .docs-content pre,
   .astro-code {
-    @apply rounded-lg border border-border p-4 text-sm my-5 overflow-x-auto shadow-sm font-mono leading-relaxed;
-  }
-
-  .astro-code,
-  .astro-code span {
-    color: var(--shiki-light);
-    background-color: var(--shiki-light-bg);
-  }
-
-  :root[data-theme="dark"] .astro-code,
-  :root[data-theme="dark"] .astro-code span {
-    color: var(--shiki-dark);
-    background-color: var(--shiki-dark-bg);
+    border-radius: 0 !important;
+    border: 2px solid #333333;
+    background-color: #111111 !important;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.65;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 

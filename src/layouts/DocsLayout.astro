@@ -21,15 +21,48 @@ const { title, description, headings = [] } = Astro.props as Props;
 ---
 
 <Layout title={title} description={description}>
-  <div class="mx-auto flex w-full max-w-[90rem] gap-8 px-6">
+  <div class="mx-auto flex w-full max-w-[105rem] gap-6 lg:gap-8 px-4 sm:px-6 md:px-8">
     <Sidebar />
-    <div class="min-w-0 flex-1 py-10">
+    <div class="min-w-0 flex-1 py-6 sm:py-10 max-w-full">
       <Breadcrumb />
-      <article class="docs-content flex flex-col gap-4">
+      <TableOfContents headings={headings} variant="mobile" />
+      <article class="docs-content flex flex-col gap-4 max-w-full">
         <slot />
       </article>
       <PrevNext />
     </div>
-    <TableOfContents headings={headings} />
+    <TableOfContents headings={headings} variant="desktop" />
   </div>
 </Layout>
+
+<script>
+  function setupDocsCodeCopy() {
+    const codeBlocks = document.querySelectorAll<HTMLPreElement>(".docs-content pre");
+    codeBlocks.forEach((pre) => {
+      if (pre.dataset.hasCopyBtn) return;
+      pre.dataset.hasCopyBtn = "true";
+      pre.classList.add("relative", "group");
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className =
+        "absolute top-2 right-2 hidden group-hover:flex items-center gap-1 rounded bg-surface/90 border border-border px-2 py-1 text-xs font-mono text-muted hover:text-ink hover:border-primary transition-all cursor-pointer z-10";
+      button.innerText = "Copy";
+
+      button.addEventListener("click", () => {
+        const code = pre.querySelector("code")?.innerText || pre.innerText;
+        navigator.clipboard.writeText(code.trim());
+        button.innerText = "✓ Copied";
+        button.classList.add("text-success");
+        setTimeout(() => {
+          button.innerText = "Copy";
+          button.classList.remove("text-success");
+        }, 2000);
+      });
+
+      pre.appendChild(button);
+    });
+  }
+
+  setupDocsCodeCopy();
+</script>

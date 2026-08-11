@@ -7,37 +7,67 @@ interface Heading {
 
 interface Props {
   headings?: Heading[];
+  variant?: "desktop" | "mobile" | "all";
 }
 
-const { headings = [] } = Astro.props as Props;
+const { headings = [], variant = "desktop" } = Astro.props as Props;
 const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
 {
   items.length > 0 && (
-    <nav
-      id="toc"
-      aria-label="On this page"
-      class="sticky top-16 hidden max-h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-3 overflow-y-auto py-8 pl-4 xl:flex"
-    >
-      <p class="text-xs font-semibold tracking-wide text-muted uppercase">On this page</p>
-      <ul class="flex flex-col gap-1.5 text-sm">
-        {items.map((item) => (
-          <li>
-            <a
-              href={`#${item.slug}`}
-              data-toc-link
-              class:list={[
-                "block text-muted transition-colors hover:text-ink",
-                item.depth === 3 && "pl-3",
-              ]}
-            >
-              {item.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <>
+      {(variant === "desktop" || variant === "all") && (
+        <nav
+          id="toc"
+          aria-label="On this page"
+          class="sticky top-16 hidden max-h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-3 overflow-y-auto py-8 pl-4 xl:flex"
+        >
+          <p class="text-xs font-semibold tracking-wide text-muted uppercase">On this page</p>
+          <ul class="flex flex-col gap-1.5 text-sm">
+            {items.map((item) => (
+              <li>
+                <a
+                  href={`#${item.slug}`}
+                  data-toc-link
+                  class:list={[
+                    "block text-muted transition-colors hover:text-ink",
+                    item.depth === 3 && "pl-3",
+                  ]}
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {(variant === "mobile" || variant === "all") && (
+        <details class="mb-6 rounded-md border border-border bg-surface p-3 text-sm xl:hidden w-full">
+          <summary class="cursor-pointer font-semibold text-xs uppercase tracking-wider text-muted flex items-center justify-between select-none">
+            <span>On this page</span>
+            <span class="text-primary font-mono text-xs font-normal">Navigation ▾</span>
+          </summary>
+          <ul class="mt-3 flex flex-col gap-2 border-t border-border/50 pt-2 text-xs sm:text-sm">
+            {items.map((item) => (
+              <li>
+                <a
+                  href={`#${item.slug}`}
+                  data-toc-link
+                  class:list={[
+                    "block text-muted transition-colors hover:text-ink",
+                    item.depth === 3 && "pl-3",
+                  ]}
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </>
   )
 }
 
@@ -64,6 +94,13 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
     );
 
     targets.forEach((target) => observer.observe(target));
+
+    links.forEach((link) => {
+      link.addEventListener("click", () => {
+        const details = link.closest("details");
+        if (details) details.open = false;
+      });
+    });
   }
 
   initTocScrollspy();
