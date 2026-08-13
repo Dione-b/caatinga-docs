@@ -32,7 +32,7 @@ Deploy
 - Licença: MIT
 - Node mínimo: 22
 - Deploy: GitHub Pages em novo repositório — `dione-b.github.io/caatinga-docs`
-- Versionamento da documentação: adiado até o projeto sair de Alpha (ver Sprint 31)
+- Versionamento da documentação: desbloqueado — o projeto saiu de Alpha (ver Sprint 31)
 
 ## Priorização
 
@@ -189,7 +189,7 @@ CAATINGA
 
 **Sprint 30 — Search.** Busca global. Começar com busca estática/local antes de qualquer infraestrutura adicional.
 
-**Sprint 31 — Versioning.** Preparar `/docs`, `/docs/v3`, `/docs/v4` (ou Latest/3.x/Next). Relevante porque o projeto está em Alpha e `3.x` não representa estabilidade de API ainda.
+**Sprint 31 — Versioning.** Preparar `/docs`, `/docs/v3`, `/docs/v4` (ou Latest/3.x/Next). Desbloqueado: o contrato v1.0 está congelado no major `3.x`, então já existe uma linha estável para versionar.
 
 **Sprint 32 — LLM documentation pipeline.** Gerador de `llms.txt` e `llms-full.txt` a partir do mesmo conteúdo do site, ordem determinística, sem elementos visuais, com exemplos/comandos/regras críticas, validado em CI.
 
