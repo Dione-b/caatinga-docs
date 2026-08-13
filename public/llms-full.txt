@@ -776,7 +776,7 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 ## Release & Versioning Policy
 
 - **Latest release**: `3.9.2` (all four packages ship in lockstep).
-- **Status**: Alpha (pre-1.0). The `3.x` major version does **not** imply API stability yet.
+- **Status**: v1.0 stable contract on npm major `3.x`. Breaking changes to the Tier 1 surface require a major bump and will land on an explicit `4.0.0`. ZK commands (`ctg zk *`) are experimental and outside the contract.
 - **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.9.2`) rather than floating tags.
 - **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.
 - **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.9.1` or later, kept aligned with the release group.
