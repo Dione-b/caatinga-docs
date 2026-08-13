@@ -17,17 +17,21 @@ init → doctor → build → deploy → generate → read / invoke → browser
 
 Run `ctg doctor` before changing deploy state or troubleshooting the environment.
 
+<Callout type="note">
+  `--help` on any subcommand works reliably as of 3.9.2 — earlier versions could crash with `Maximum call stack size exceeded` on some subcommands.
+</Callout>
+
 ## Command Matrix
 
 | Command | Description | Common Flags |
 | :--- | :--- | :--- |
-| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template` |
+| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template`, `--minimal` |
 | **`ctg doctor`** | Health check of toolchain & config | `--strict`, `--strict-env`, `--strict-bindings` |
 | **`ctg build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
 | **`ctg deploy`** | Deploy WASM binaries following DAG | `--network`, `--source`, `--upgrade`, `--if-changed`, `--no-generate`, `--no-wire`, `--no-sync-env` |
 | **`ctg upgrade`** | In-place WASM upgrade on existing instance | `--network`, `--source`, `--if-changed`, `--no-build`, `--generate` |
 | **`ctg wire`** | Execute `postDeploy` hooks after deployment | `--network`, `--source` |
-| **`ctg sync-env`** | Sync deployed contract IDs to `frontend.env` | `--network` |
+| **`ctg sync-env`** | Merge deployed contract IDs into `frontend.env` | `--network` |
 | **`ctg generate`** | Generate TS client bindings | `--output`, `--network` |
 | **`ctg status`** | Display deployed contract state & binding freshness | `--network`, `--strict` |
 | **`ctg invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg`, `--source` |
@@ -37,4 +41,16 @@ Run `ctg doctor` before changing deploy state or troubleshooting the environment
 | **`ctg ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
 | **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import` |
 | **`ctg zk`** | Circom Groth16 ZK proof helpers | `--allow-dev-ceremony` |
+
+<Callout type="warning">
+  `ctg generate` fails with `CAATINGA_INVALID_CONFIG` unless `frontend.bindingsOutput` is set in `caatinga.config.ts` — which is the case for every `--minimal` project. `doctor` and `status` only recommend running `generate` once it can actually succeed. See [`CAATINGA_INVALID_CONFIG`](/docs/reference/errors) for the exact snippet to add.
+</Callout>
+
+<Callout type="note">
+  `ctg sync-env` no longer wipes the target env file (3.9.2+). It rewrites only the keys mapped in `frontend.env`; unrelated variables, comments, and blank lines are preserved, and new keys are appended.
+</Callout>
+
+<Callout type="note">
+  `ctg init --minimal` ships a `Cargo.lock` (3.9.2+), so `cargo test` works in the generated project without first resolving a dependency graph that could otherwise pick an incompatible `ed25519-dalek` version.
+</Callout>
 

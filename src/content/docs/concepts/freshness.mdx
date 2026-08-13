@@ -18,6 +18,10 @@ Caatinga tracks whether generated TypeScript client bindings are synchronized wi
 | **`missing`** | No TypeScript bindings exist on disk | `ctg generate` |
 | **`unknown`** | Bindings exist but predate freshness tracking markers | Regenerate once with `ctg generate` |
 
+<Callout type="note">
+  If `caatinga.config.ts` has no `frontend.bindingsOutput`, freshness evaluation reports the project as unconfigured (a `frontendUnconfigured` flag alongside `status`) rather than `missing` — `ctg generate` cannot run at all in that state, and `doctor`/`status` no longer suggest running it until the field is set. See [`CAATINGA_INVALID_CONFIG`](/docs/reference/errors) for the exact snippet to add.
+</Callout>
+
 ## Freshness Marker Structure
 
 Inside `src/contracts/generated/<contract>/.caatinga-bindings.json`:

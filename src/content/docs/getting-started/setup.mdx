@@ -55,6 +55,16 @@ Generate TypeScript bindings for your frontend:
 npx ctg generate
 ```
 
+<Callout type="note">
+  `ctg generate` requires a `frontend.bindingsOutput` field in `caatinga.config.ts` — the default template sets this up for you, but `--minimal` projects do not. If you scaffolded with `--minimal`, add it first:
+
+  ```ts
+  frontend: {
+    bindingsOutput: "./src/contracts/generated"
+  }
+  ```
+</Callout>
+
 Now invoke contract functions directly:
 
 ```bash

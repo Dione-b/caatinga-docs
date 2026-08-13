@@ -15,30 +15,51 @@ Managing signing keys and identities is critical for secure deployment pipelines
 
 ### `identity export`
 
-Export a configured Stellar identity alias into an encrypted payload for CI/CD environments.
+Export your whole Stellar CLI config directory (`~/.config/stellar` by default, or `STELLAR_HOME`) as a base64-encoded tarball, written to **stdout**. This is not per-alias — it archives the entire config directory, including every identity stored there.
 
 ```bash
-npx ctg identity export --source alice --out alice-identity.json
+npx ctg identity export > stellar-config.b64
 ```
 
 **Flags:**
-- `--source <alias>`: Identity alias registered in Stellar CLI.
-- `--out <path>`: Destination filepath for the exported identity bundle.
+- `--path <path>`: Stellar config directory to archive (default: `~/.config/stellar`).
+
+<Callout type="warning">
+  The output is base64, **not encrypted**. Treat it as key material — pipe it straight into a CI secret store (e.g. `CAATINGA_CI_STELLAR_CONFIG_B64`) rather than saving it to disk.
+</Callout>
 
 ---
 
 ### `identity import`
 
-Import a previously exported identity bundle into a local environment or CI runner.
+Import a base64 tarball produced by `identity export` into a local environment or CI runner.
 
 ```bash
-npx ctg identity import --in alice-identity.json
+npx ctg identity import stellar-config.b64
 ```
 
+`<archive>` is a positional argument: the path to the base64-encoded tarball file (not JSON, not encrypted).
+
 **Flags:**
-- `--in <path>`: Path to the encrypted identity JSON bundle.
+- `--path <path>`: Target Stellar config directory to restore into (default: `~/.config/stellar`).
 
 ---
+
+## Security advisory (fixed in 3.9.2)
+
+<Callout type="warning">
+  **Action required if you have ever run `ctg identity export` or `ctg identity import` before 3.9.2.**
+
+  Earlier versions wrote the tarball to `os.tmpdir()` using a predictable `Date.now()` filename and default permissions, and never deleted it. That means a world-readable copy of your Stellar secret keys could sit on disk indefinitely. Upgrading to 3.9.2+ stops new leaks — it does **not** remove archives already on disk. Check every machine and CI image where `identity export`/`import` has ever run:
+
+  ```bash
+  ls -la /tmp/caatinga-stellar-*.tar.gz
+  ```
+
+  Delete anything it lists, and rotate the affected keys if the machine is shared or the files may have been picked up by CI artifact upload or backups.
+</Callout>
+
+As of 3.9.2, the archive is written inside a `mkdtemp` directory created with mode `0700` under a random name, and removed in a `finally` block — so it cannot outlive the command, even if `tar` fails. `identity import` writes the temp archive with mode `0600` and creates the target directory with mode `0700`.
 
 ## Security Best Practices
 

@@ -22,17 +22,21 @@ init → doctor → build → deploy → generate → read / invoke → browser
 
 Run `ctg doctor` before changing deploy state or troubleshooting the environment.
 
+> **Note (note)**: 
+  `--help` on any subcommand works reliably as of 3.9.2 — earlier versions could crash with `Maximum call stack size exceeded` on some subcommands.
+
+
 ## Command Matrix
 
 | Command | Description | Common Flags |
 | :--- | :--- | :--- |
-| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template` |
+| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template`, `--minimal` |
 | **`ctg doctor`** | Health check of toolchain & config | `--strict`, `--strict-env`, `--strict-bindings` |
 | **`ctg build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
 | **`ctg deploy`** | Deploy WASM binaries following DAG | `--network`, `--source`, `--upgrade`, `--if-changed`, `--no-generate`, `--no-wire`, `--no-sync-env` |
 | **`ctg upgrade`** | In-place WASM upgrade on existing instance | `--network`, `--source`, `--if-changed`, `--no-build`, `--generate` |
 | **`ctg wire`** | Execute `postDeploy` hooks after deployment | `--network`, `--source` |
-| **`ctg sync-env`** | Sync deployed contract IDs to `frontend.env` | `--network` |
+| **`ctg sync-env`** | Merge deployed contract IDs into `frontend.env` | `--network` |
 | **`ctg generate`** | Generate TS client bindings | `--output`, `--network` |
 | **`ctg status`** | Display deployed contract state & binding freshness | `--network`, `--strict` |
 | **`ctg invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg`, `--source` |
@@ -42,6 +46,17 @@ Run `ctg doctor` before changing deploy state or troubleshooting the environment
 | **`ctg ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
 | **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import` |
 | **`ctg zk`** | Circom Groth16 ZK proof helpers | `--allow-dev-ceremony` |
+
+> **Note (warning)**: 
+  `ctg generate` fails with `CAATINGA_INVALID_CONFIG` unless `frontend.bindingsOutput` is set in `caatinga.config.ts` — which is the case for every `--minimal` project. `doctor` and `status` only recommend running `generate` once it can actually succeed. See [`CAATINGA_INVALID_CONFIG`](/docs/reference/errors) for the exact snippet to add.
+
+
+> **Note (note)**: 
+  `ctg sync-env` no longer wipes the target env file (3.9.2+). It rewrites only the keys mapped in `frontend.env`; unrelated variables, comments, and blank lines are preserved, and new keys are appended.
+
+
+> **Note (note)**: 
+  `ctg init --minimal` ships a `Cargo.lock` (3.9.2+), so `cargo test` works in the generated project without first resolving a dependency graph that could otherwise pick an incompatible `ed25519-dalek` version.
 
 
 ---
@@ -61,30 +76,51 @@ Managing signing keys and identities is critical for secure deployment pipelines
 
 ### `identity export`
 
-Export a configured Stellar identity alias into an encrypted payload for CI/CD environments.
+Export your whole Stellar CLI config directory (`~/.config/stellar` by default, or `STELLAR_HOME`) as a base64-encoded tarball, written to **stdout**. This is not per-alias — it archives the entire config directory, including every identity stored there.
 
 ```bash
-npx ctg identity export --source alice --out alice-identity.json
+npx ctg identity export > stellar-config.b64
 ```
 
 **Flags:**
-- `--source <alias>`: Identity alias registered in Stellar CLI.
-- `--out <path>`: Destination filepath for the exported identity bundle.
+- `--path <path>`: Stellar config directory to archive (default: `~/.config/stellar`).
+
+> **Note (warning)**: 
+  The output is base64, **not encrypted**. Treat it as key material — pipe it straight into a CI secret store (e.g. `CAATINGA_CI_STELLAR_CONFIG_B64`) rather than saving it to disk.
+
 
 ---
 
 ### `identity import`
 
-Import a previously exported identity bundle into a local environment or CI runner.
+Import a base64 tarball produced by `identity export` into a local environment or CI runner.
 
 ```bash
-npx ctg identity import --in alice-identity.json
+npx ctg identity import stellar-config.b64
 ```
 
+`<archive>` is a positional argument: the path to the base64-encoded tarball file (not JSON, not encrypted).
+
 **Flags:**
-- `--in <path>`: Path to the encrypted identity JSON bundle.
+- `--path <path>`: Target Stellar config directory to restore into (default: `~/.config/stellar`).
 
 ---
+
+## Security advisory (fixed in 3.9.2)
+
+> **Note (warning)**: 
+  **Action required if you have ever run `ctg identity export` or `ctg identity import` before 3.9.2.**
+
+  Earlier versions wrote the tarball to `os.tmpdir()` using a predictable `Date.now()` filename and default permissions, and never deleted it. That means a world-readable copy of your Stellar secret keys could sit on disk indefinitely. Upgrading to 3.9.2+ stops new leaks — it does **not** remove archives already on disk. Check every machine and CI image where `identity export`/`import` has ever run:
+
+  ```bash
+  ls -la /tmp/caatinga-stellar-*.tar.gz
+  ```
+
+  Delete anything it lists, and rotate the affected keys if the machine is shared or the files may have been picked up by CI artifact upload or backups.
+
+
+As of 3.9.2, the archive is written inside a `mkdtemp` directory created with mode `0700` under a random name, and removed in a `finally` block — so it cannot outlive the command, even if `tar` fails. `identity import` writes the temp archive with mode `0600` and creates the target directory with mode `0700`.
 
 ## Security Best Practices
 
@@ -304,7 +340,7 @@ token
 
 ## Cycle Validation
 
-Caatinga validates the DAG during config loading. If a cycle is detected (e.g. `A` depends on `B` and `B` depends on `A`), deployment halts immediately with error code `CAATINGA_CONFIG_CYCLE_DETECTED`.
+Caatinga validates the DAG during config loading. If a cycle is detected (e.g. `A` depends on `B` and `B` depends on `A`), deployment halts immediately with error code `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`.
 
 
 ---
@@ -383,6 +419,10 @@ Caatinga tracks whether generated TypeScript client bindings are synchronized wi
 | **`stale`** | Contract was redeployed or upgraded since last `ctg generate` | `ctg generate <name> --network <net>` |
 | **`missing`** | No TypeScript bindings exist on disk | `ctg generate` |
 | **`unknown`** | Bindings exist but predate freshness tracking markers | Regenerate once with `ctg generate` |
+
+> **Note (note)**: 
+  If `caatinga.config.ts` has no `frontend.bindingsOutput`, freshness evaluation reports the project as unconfigured (a `frontendUnconfigured` flag alongside `status`) rather than `missing` — `ctg generate` cannot run at all in that state, and `doctor`/`status` no longer suggest running it until the field is set. See [`CAATINGA_INVALID_CONFIG`](/docs/reference/errors) for the exact snippet to add.
+
 
 ## Freshness Marker Structure
 
@@ -535,15 +575,15 @@ Before using Caatinga, ensure your environment meets the prerequisites for Node.
 | :--- | :--- | :--- | :--- |
 | **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
 | **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
-| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32-unknown-unknown` |
+| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32v1-none` |
 | **Stellar CLI** | `23.0.0+` | Latest release | Used under the hood for WASM operations |
 
 ## Rust & WASM Setup
 
-Soroban smart contracts require the `wasm32-unknown-unknown` target:
+Soroban smart contracts require the `wasm32v1-none` target:
 
 ```bash
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32v1-none
 ```
 
 Verify your installation:
@@ -623,7 +663,7 @@ Output:
 
 ```text
 ✓ Node.js version >= 22.0.0
-✓ Rust toolchain installed (wasm32-unknown-unknown target active)
+✓ Rust toolchain installed (wasm32v1-none target active)
 ✓ Stellar CLI detected in PATH
 ✓ Config caatinga.config.ts validated
 ```
@@ -686,6 +726,16 @@ Generate TypeScript bindings for your frontend:
 npx ctg generate
 ```
 
+> **Note (note)**: 
+  `ctg generate` requires a `frontend.bindingsOutput` field in `caatinga.config.ts` — the default template sets this up for you, but `--minimal` projects do not. If you scaffolded with `--minimal`, add it first:
+
+  ```ts
+  frontend: {
+    bindingsOutput: "./src/contracts/generated"
+  }
+  ```
+
+
 Now invoke contract functions directly:
 
 ```bash
@@ -725,10 +775,17 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 
 ## Release & Versioning Policy
 
-- **Dist Tags**: `latest` (v3.8.0) / `next` (v3.9.1).
+- **Latest release**: `3.9.2` (all four packages ship in lockstep).
 - **Status**: Alpha (pre-1.0). The `3.x` major version does **not** imply API stability yet.
-- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.8.0`) rather than floating tags.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.9.2`) rather than floating tags.
 - **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.
+- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.9.1` or later, kept aligned with the release group.
+
+### 3.9.2 highlights
+
+- **Security fix**: `identity export`/`import` no longer leave a leftover tarball of Stellar secret keys in `os.tmpdir()`. See [CLI Identity Reference](/docs/cli/identity) for the remediation steps if you ran either command before upgrading.
+- **Smaller install**: the published `@caatinga/cli` tarball dropped from 95.3 MB packed / 283.7 MB unpacked to 67.4 kB — the Rust `target/` build directory and `test_snapshots` are now excluded from what gets published.
+- `sync-env` no longer wipes unrelated variables in the target env file; concurrent `deploy`/`upgrade` no longer race on `caatinga.artifacts.json`; `deploy` retries when the RPC hasn't indexed a just-uploaded WASM yet. See [Gotchas](/docs/reference/gotchas) for the full list.
 
 
 ---
@@ -756,7 +813,7 @@ When a command fails, Caatinga returns a structured error payload containing the
 
 ---
 
-### `CAATINGA_CONFIG_CYCLE_DETECTED`
+### `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`
 - **Category**: Dependency Graph
 - **Description**: Circular dependency detected during contract graph resolution.
 - **Common Causes**: Contract A depends on Contract B while Contract B depends on Contract A in `dependsOn`.
@@ -778,21 +835,69 @@ When a command fails, Caatinga returns a structured error payload containing the
 - **Common Causes**: Insufficient account balance for fees, invalid identity alias, or network RPC timeout.
 - **How to Fix**: Verify `npx ctg doctor`, check account funds on Testnet/Mainnet, and ensure `--source` alias exists.
 
+> **Note (note)**: 
+  As of 3.9.2, a transient RPC timing issue — the just-uploaded WASM not yet indexed, surfacing as `Error(Storage, MissingValue)` / `"Wasm does not exist"` — is retried with backoff instead of raising `CAATINGA_DEPLOY_FAILED` directly. If you still see this code, the retries were exhausted or the failure doesn't match that narrow pattern.
+
+
 ---
 
-### `CAATINGA_SOURCE_INVALID_KEY`
+### `CAATINGA_INVALID_CONFIG`
+- **Category**: Configuration
+- **Description**: `caatinga.config.ts` failed schema validation.
+- **Common Causes**: Running `ctg generate` without a `frontend.bindingsOutput` field configured — this includes every project scaffolded with `--minimal`.
+- **How to Fix**: As of 3.9.2, the error prints the exact snippet to paste:
+
+  ```ts
+  frontend: {
+    bindingsOutput: "./src/contracts/generated"
+  }
+  ```
+
+  Bindings are written to that directory, one subdirectory per contract. `doctor` and `status` only recommend running `generate` once this field is set.
+
+---
+
+### `CAATINGA_NETWORK_NOT_FOUND`
+- **Category**: Configuration
+- **Description**: The network name passed to `--network` is not declared in `caatinga.config.ts` and is not one of the well-known networks.
+- **Common Causes**: Typo in `--network`, or a custom network missing from config.
+- **How to Fix**: As of 3.9.2, the hint renders a config snippet from the same typed network definitions Caatinga uses internally, so the emitted `networkPassphrase`, RPC URL, and other fields cannot drift from what the schema actually accepts (earlier versions emitted a hand-written snippet with an invalid `passphrase:` key and the wrong mainnet passphrase).
+
+---
+
+### `CAATINGA_INVALID_TEMPLATE_MANIFEST` / `CAATINGA_TEMPLATE_INCOMPATIBLE`
+- **Category**: Templates
+- **Description**: A template's `caatinga.template.json` manifest is malformed, or declares a `compatibleCore` range that the installed `@caatinga/core` version does not satisfy.
+- **Common Causes**: A hand-edited or third-party template with a bad manifest.
+- **How to Fix**: Check the manifest against the template schema, or bump `compatibleCore`. Prior to 3.9.2 these were reported as `CAATINGA_UNEXPECTED_ERROR` — if your automation greps for that code to detect bad templates, update it to match these codes instead.
+
+---
+
+### `CAATINGA_SOURCE_IS_SECRET_KEY` / `CAATINGA_SOURCE_IS_PUBLIC_KEY` / `CAATINGA_SOURCE_IS_SEED_PHRASE`
 - **Category**: Security / Identity
-- **Description**: `--source` parameter contained a raw key (`G...`, `S...`) or secret phrase instead of a Stellar CLI identity alias.
-- **Common Causes**: Passing raw Stellar secret key or public key to CLI.
+- **Description**: `--source` contained a raw Stellar secret key (`S...`), public key (`G...`), or seed phrase instead of a Stellar CLI identity alias.
+- **Common Causes**: Passing raw key material to the CLI directly instead of an identity alias.
 - **How to Fix**: Use an identity alias (e.g. `--source alice`). See [CLI Identity Reference](/docs/cli/identity).
+
+---
+
+### `CAATINGA_UNSAFE_SOURCE_ACCOUNT`
+- **Category**: Security / Identity
+- **Description**: The resolved source account failed a safety check (e.g. a `postDeploy` hook `source` override that isn't an allowed alias).
+- **How to Fix**: Ensure any `source` override passed to hooks or commands resolves through `assertSafeSourceAccount`'s allowed identity set.
 
 ---
 
 ### `CAATINGA_ARTIFACT_NOT_FOUND`
 - **Category**: Artifacts
 - **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.
-- **Common Causes**: Attempting `ctg invoke` or `ctg generate` before running `ctg deploy`.
+- **Common Causes**: Attempting `ctg invoke` or `ctg read` before running `ctg deploy`.
 - **How to Fix**: Run `npx ctg deploy --network <network>` to generate artifacts.
+
+---
+
+> **Note (note)**: 
+  This catalog is a curated subset of the ~60 public `CAATINGA_*` codes — absence from this page does not mean a code doesn't exist. See `packages/core/src/errors/CaatingaErrorCode.ts` for the full enum, and note that the no-retry/retry classification for transient failures (used by `deploy`, `upgrade`, and post-deploy hooks) is enforced against `error.code` directly as of 3.9.2, not by scanning error message text.
 
 
 ---
@@ -800,7 +905,7 @@ When a command fails, Caatinga returns a structured error payload containing the
 ## Section: Key Gotchas & Architectural Rules
 
 Path: /docs/reference/gotchas
-Description: 25 essential rules, gotchas, and constraints for Caatinga projects.
+Description: 29 essential rules, gotchas, and constraints for Caatinga projects.
 
 # Key Gotchas & Architectural Rules
 
@@ -810,7 +915,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 
 1. **`--source` must be a CLI identity alias**: Always use an alias (e.g. `alice`). Never pass a public key (`G...`), secret key (`S...`), or seed phrase.
 2. **Deploy auto-generates bindings**: Pass `--no-generate` if you wish to skip binding generation during CI deploys.
-3. **Full graph deploy auto-runs `wire` + `sync-env`**: Pass `--no-wire` or `--no-sync-env` to disable post-deploy hooks and environment synchronization.
+3. **Full graph deploy auto-runs `wire` + `sync-env`**: Pass `--no-wire` or `--no-sync-env` to disable post-deploy hooks and environment synchronization. As of 3.9.2, `sync-env` no longer wipes the target env file — only the keys mapped in `frontend.env` are rewritten; unrelated assignments, comments, and blank lines are left untouched, and new keys are appended. (Before 3.9.2 it rebuilt the whole file, silently destroying other variables like API keys.)
 4. **Browser invoke is single-invoker only until v1.0**: Multi-signer transactions (`signAuthEntry`) require custom application code and throw `CAATINGA_MULTI_AUTH_REQUIRED`.
 5. **ZK on mainnet is blocked by default**: Dev ceremony artifacts require `--allow-dev-ceremony` to deploy on mainnet.
 6. **Fresh machine setup**: Install Node 22+, Rust, and Stellar CLI manually, then verify with `npx ctg doctor`.
@@ -829,8 +934,12 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 19. **`doctor --strict`**: Fails on environment drift (`--strict-env`) and stale bindings (`--strict-bindings`).
 20. **`ctg regression`**: Local execution recipe mirroring CI: `test → build → deploy --if-changed → generate → smoke`.
 21. **Alias resolution**: Method arguments accept `${source.address}` or CLI identity aliases (length ≥ 3).
-22. **`identity export/import`**: Exports an encrypted base64 tarball for `CAATINGA_CI_STELLAR_CONFIG_B64`.
+22. **`identity export/import`**: Exports your whole Stellar config directory as a **base64 tarball — not encrypted**. Treat the output as key material for `CAATINGA_CI_STELLAR_CONFIG_B64`. Prior to 3.9.2, the archive was also left behind, world-readable, in `os.tmpdir()`; if `identity export`/`import` ever ran on a machine before upgrading, check for and delete `/tmp/caatinga-stellar-*.tar.gz` and rotate any exposed keys. See [CLI Identity Reference](/docs/cli/identity).
 23. **Config graph validation**: `${contracts.*.contractId}` placeholders in `deployArgs` must be declared in `dependsOn`; validated at config load time.
 24. **`ctg upgrade` vs `deploy --upgrade`**: In-place preserves `contractId` and invokes `upgrade()`; redeploy (`deploy --upgrade`) creates a new contract instance.
 25. **`read --summary` / `--quiet`**: Truncates large array payloads for clean terminal inspection on shared networks.
+26. **`ctg generate` requires `frontend.bindingsOutput`**: Every `--minimal` scaffold starts without it. `doctor`/`status` only recommend `generate` once the field is configured; the error prints the exact snippet to paste.
+27. **Concurrent `deploy`/`upgrade` are safe as of 3.9.2**: Artifact writes to `caatinga.artifacts.json` are serialized with a lockfile and re-read inside the lock, so two processes running at once can no longer drop each other's `contractId`.
+28. **`parseContractId` prefers labeled output**: As of 3.9.2 it favors the last explicitly labeled contract-ID line, then the last standalone ID line, then the last bare match — and only matches the base32 alphabet (`A-Z2-7`) real strkeys use — so a diagnostic line printed before the real result can no longer be mistaken for the deployed contract ID.
+29. **`deploy` retries un-indexed WASM**: If the RPC hasn't yet indexed a just-uploaded WASM hash, `deploy` retries with backoff instead of failing immediately with `CAATINGA_DEPLOY_FAILED`.
 

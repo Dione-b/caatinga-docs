@@ -23,7 +23,7 @@ When a command fails, Caatinga returns a structured error payload containing the
 
 ---
 
-### `CAATINGA_CONFIG_CYCLE_DETECTED`
+### `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`
 - **Category**: Dependency Graph
 - **Description**: Circular dependency detected during contract graph resolution.
 - **Common Causes**: Contract A depends on Contract B while Contract B depends on Contract A in `dependsOn`.
@@ -45,18 +45,67 @@ When a command fails, Caatinga returns a structured error payload containing the
 - **Common Causes**: Insufficient account balance for fees, invalid identity alias, or network RPC timeout.
 - **How to Fix**: Verify `npx ctg doctor`, check account funds on Testnet/Mainnet, and ensure `--source` alias exists.
 
+<Callout type="note">
+  As of 3.9.2, a transient RPC timing issue — the just-uploaded WASM not yet indexed, surfacing as `Error(Storage, MissingValue)` / `"Wasm does not exist"` — is retried with backoff instead of raising `CAATINGA_DEPLOY_FAILED` directly. If you still see this code, the retries were exhausted or the failure doesn't match that narrow pattern.
+</Callout>
+
 ---
 
-### `CAATINGA_SOURCE_INVALID_KEY`
+### `CAATINGA_INVALID_CONFIG`
+- **Category**: Configuration
+- **Description**: `caatinga.config.ts` failed schema validation.
+- **Common Causes**: Running `ctg generate` without a `frontend.bindingsOutput` field configured — this includes every project scaffolded with `--minimal`.
+- **How to Fix**: As of 3.9.2, the error prints the exact snippet to paste:
+
+  ```ts
+  frontend: {
+    bindingsOutput: "./src/contracts/generated"
+  }
+  ```
+
+  Bindings are written to that directory, one subdirectory per contract. `doctor` and `status` only recommend running `generate` once this field is set.
+
+---
+
+### `CAATINGA_NETWORK_NOT_FOUND`
+- **Category**: Configuration
+- **Description**: The network name passed to `--network` is not declared in `caatinga.config.ts` and is not one of the well-known networks.
+- **Common Causes**: Typo in `--network`, or a custom network missing from config.
+- **How to Fix**: As of 3.9.2, the hint renders a config snippet from the same typed network definitions Caatinga uses internally, so the emitted `networkPassphrase`, RPC URL, and other fields cannot drift from what the schema actually accepts (earlier versions emitted a hand-written snippet with an invalid `passphrase:` key and the wrong mainnet passphrase).
+
+---
+
+### `CAATINGA_INVALID_TEMPLATE_MANIFEST` / `CAATINGA_TEMPLATE_INCOMPATIBLE`
+- **Category**: Templates
+- **Description**: A template's `caatinga.template.json` manifest is malformed, or declares a `compatibleCore` range that the installed `@caatinga/core` version does not satisfy.
+- **Common Causes**: A hand-edited or third-party template with a bad manifest.
+- **How to Fix**: Check the manifest against the template schema, or bump `compatibleCore`. Prior to 3.9.2 these were reported as `CAATINGA_UNEXPECTED_ERROR` — if your automation greps for that code to detect bad templates, update it to match these codes instead.
+
+---
+
+### `CAATINGA_SOURCE_IS_SECRET_KEY` / `CAATINGA_SOURCE_IS_PUBLIC_KEY` / `CAATINGA_SOURCE_IS_SEED_PHRASE`
 - **Category**: Security / Identity
-- **Description**: `--source` parameter contained a raw key (`G...`, `S...`) or secret phrase instead of a Stellar CLI identity alias.
-- **Common Causes**: Passing raw Stellar secret key or public key to CLI.
+- **Description**: `--source` contained a raw Stellar secret key (`S...`), public key (`G...`), or seed phrase instead of a Stellar CLI identity alias.
+- **Common Causes**: Passing raw key material to the CLI directly instead of an identity alias.
 - **How to Fix**: Use an identity alias (e.g. `--source alice`). See [CLI Identity Reference](/docs/cli/identity).
+
+---
+
+### `CAATINGA_UNSAFE_SOURCE_ACCOUNT`
+- **Category**: Security / Identity
+- **Description**: The resolved source account failed a safety check (e.g. a `postDeploy` hook `source` override that isn't an allowed alias).
+- **How to Fix**: Ensure any `source` override passed to hooks or commands resolves through `assertSafeSourceAccount`'s allowed identity set.
 
 ---
 
 ### `CAATINGA_ARTIFACT_NOT_FOUND`
 - **Category**: Artifacts
 - **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.
-- **Common Causes**: Attempting `ctg invoke` or `ctg generate` before running `ctg deploy`.
+- **Common Causes**: Attempting `ctg invoke` or `ctg read` before running `ctg deploy`.
 - **How to Fix**: Run `npx ctg deploy --network <network>` to generate artifacts.
+
+---
+
+<Callout type="note">
+  This catalog is a curated subset of the ~60 public `CAATINGA_*` codes — absence from this page does not mean a code doesn't exist. See `packages/core/src/errors/CaatingaErrorCode.ts` for the full enum, and note that the no-retry/retry classification for transient failures (used by `deploy`, `upgrade`, and post-deploy hooks) is enforced against `error.code` directly as of 3.9.2, not by scanning error message text.
+</Callout>

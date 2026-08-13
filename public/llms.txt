@@ -14,4 +14,4 @@
 - [Setup & Initial Workflow](/docs/getting-started/setup): Quick walkthrough of initializing, building, deploying, and invoking your first Soroban dapp.
 - [Package Reference](/docs/reference/packages): Complete package index for @caatinga/cli, @caatinga/core, @caatinga/client, and @caatinga/zk.
 - [Error Reference](/docs/reference/errors): Searchable public error code reference for CAATINGA_* machine-readable error codes.
-- [Key Gotchas & Architectural Rules](/docs/reference/gotchas): 25 essential rules, gotchas, and constraints for Caatinga projects.
+- [Key Gotchas & Architectural Rules](/docs/reference/gotchas): 29 essential rules, gotchas, and constraints for Caatinga projects.

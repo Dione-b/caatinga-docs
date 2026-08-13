@@ -15,15 +15,15 @@ Before using Caatinga, ensure your environment meets the prerequisites for Node.
 | :--- | :--- | :--- | :--- |
 | **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
 | **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
-| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32-unknown-unknown` |
+| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32v1-none` |
 | **Stellar CLI** | `23.0.0+` | Latest release | Used under the hood for WASM operations |
 
 ## Rust & WASM Setup
 
-Soroban smart contracts require the `wasm32-unknown-unknown` target:
+Soroban smart contracts require the `wasm32v1-none` target:
 
 ```bash
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32v1-none
 ```
 
 Verify your installation:

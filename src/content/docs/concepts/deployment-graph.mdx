@@ -52,4 +52,4 @@ token
 
 ## Cycle Validation
 
-Caatinga validates the DAG during config loading. If a cycle is detected (e.g. `A` depends on `B` and `B` depends on `A`), deployment halts immediately with error code `CAATINGA_CONFIG_CYCLE_DETECTED`.
+Caatinga validates the DAG during config loading. If a cycle is detected (e.g. `A` depends on `B` and `B` depends on `A`), deployment halts immediately with error code `CAATINGA_CONTRACT_DEPENDENCY_CYCLE`.
