@@ -16,12 +16,19 @@ import ElectronicFlowBackground from "@components/ElectronicFlowBackground.astro
 
       <Container size="lg" class="relative z-10">
         <div class="flex flex-col items-center text-center gap-5 sm:gap-6 py-6 sm:py-12">
+          <a
+            href="https://skills.stellar.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group inline-flex items-center gap-2 sm:gap-3 rounded-full border border-accent bg-surface pl-3 pr-2 py-1.5 sm:pl-4 sm:pr-2.5 sm:py-2 text-xs sm:text-sm font-semibold text-ink shadow-sm transition-colors hover:bg-accent/10 max-w-full"
+          >
+            <span class="truncate">⚡ Caatinga skill for Claude Code — now on skills.stellar.org</span>
+            <span class="inline-flex items-center justify-center rounded-full bg-accent text-on-accent w-5 h-5 sm:w-6 sm:h-6 text-xs shrink-0 transition-transform group-hover:translate-x-0.5">→</span>
+          </a>
+
           <div class="flex flex-wrap items-center justify-center gap-2 max-w-full">
             <Badge variant="primary">Documentation 2.0</Badge>
             <Badge variant="default">Soroban CLI Orchestrator</Badge>
-            <a href="https://skills.stellar.org/" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition-opacity">
-              <Badge variant="accent">⚡ Claude Code skill on skills.stellar.org</Badge>
-            </a>
           </div>
 
           <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-ink max-w-4xl leading-tight sm:leading-tight">
@@ -43,11 +50,6 @@ import ElectronicFlowBackground from "@components/ElectronicFlowBackground.astro
             <code class="text-ink font-semibold truncate sm:whitespace-normal">npx ctg init my-dapp</code>
             <Badge variant="success" class="shrink-0">v1.0</Badge>
           </div>
-
-          <p class="text-xs sm:text-sm text-muted">
-            Using an AI agent? Install the Caatinga skill for Claude Code —
-            <a href="https://skills.stellar.org/" target="_blank" rel="noopener noreferrer" class="text-primary font-medium hover:underline">skills.stellar.org</a>
-          </p>
         </div>
       </Container>
     </section>
