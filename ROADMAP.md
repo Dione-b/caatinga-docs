@@ -34,6 +34,14 @@ Deploy
 - Deploy: GitHub Pages em novo repositório — `dione-b.github.io/caatinga-docs`
 - Versionamento da documentação: desbloqueado — o projeto saiu de Alpha (ver Sprint 31)
 
+## Notas de sincronização com `caatinga` (fonte real)
+
+Este projeto ainda não tem páginas de conteúdo publicadas; até lá, `caatinga/docs/` (no monorepo) é a fonte autoritativa e deve ser conferida sempre que uma sprint de conteúdo (Fase 2) for executada, em vez de reescrever do zero. Estado mais recente relevante para migração:
+
+- **Versão atual:** `@caatinga/cli` `3.9.2` (não `3.9.0` — `caatinga/docs/for-llms.md` estava desatualizado e já foi corrigido lá).
+- **Dois fixes de segurança recentes** a cobrir nos Sprints 22 (Error reference) e 23 (Troubleshooting): tar path traversal em `ctg identity import`, e verificação de checksum pinado no download do `circom` (novo código `ZK_CHECKSUM_MISMATCH`). Já documentados em `caatinga/docs/troubleshooting.md` ("Security fixes"), `caatinga/docs/errors.md` e `caatinga/docs/zk.md` — usar como base ao escrever as páginas equivalentes aqui.
+- **Skill oficial do Claude Code:** [`ctg-skills`](https://github.com/Dione-b/caatinga-skill) (`/plugin marketplace add Dione-b/caatinga-skill` → `/plugin install caatinga-skill@caatinga-skill`) é agora o plugin oficial de Caatinga para Claude Code. Já referenciado em `caatinga/README.md` e `caatinga/docs/tutorials/integration-guide.md`; precisa de entrada própria em **Resources** (ver estrutura de navegação acima) e menção na Sprint 27 (CI/CD) ou Sprint 9 (Getting Started) como forma recomendada de usar Caatinga com agentes de IA.
+
 ## Priorização
 
 Não executar as 45 sprints linearmente como se todas tivessem o mesmo peso. Quatro fases:
@@ -114,7 +122,8 @@ CAATINGA
     ├── GitHub
     ├── npm
     ├── Examples
-    └── Ecosystem
+    ├── Ecosystem
+    └── Claude Code Skill (ctg-skills)
 ```
 
 ## Sprints
