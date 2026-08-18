@@ -33,5 +33,7 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 ### 3.9.2 highlights
 
 - **Security fix**: `identity export`/`import` no longer leave a leftover tarball of Stellar secret keys in `os.tmpdir()`. See [CLI Identity Reference](/docs/cli/identity) for the remediation steps if you ran either command before upgrading.
+- **Security fix**: `identity import` now rejects a tarball if any entry would extract outside the target Stellar config directory (tar path traversal). Only import archives from a trusted source.
+- **Security fix**: the ZK toolchain now verifies every `circom` binary — freshly downloaded or read from the `~/.caatinga/zk-tools` cache — against a pinned SHA-256 before use, deleting and rejecting it (`ZK_CHECKSUM_MISMATCH`) on a mismatch instead of running an unverified binary. See [Errors reference](/docs/reference/errors).
 - **Smaller install**: the published `@caatinga/cli` tarball dropped from 95.3 MB packed / 283.7 MB unpacked to 67.4 kB — the Rust `target/` build directory and `test_snapshots` are now excluded from what gets published.
 - `sync-env` no longer wipes unrelated variables in the target env file; concurrent `deploy`/`upgrade` no longer race on `caatinga.artifacts.json`; `deploy` retries when the RPC hasn't indexed a just-uploaded WASM yet. See [Gotchas](/docs/reference/gotchas) for the full list.

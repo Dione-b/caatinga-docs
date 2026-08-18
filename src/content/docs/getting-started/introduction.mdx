@@ -52,4 +52,13 @@ Caatinga operates on two source of truth files in your workspace:
   Never edit `caatinga.artifacts.json` manually. Caatinga updates this file atomically during builds and deployments.
 </Callout>
 
+## Using Caatinga with AI agents
+
+Caatinga ships its own Claude Code skill — [ctg-skills](https://github.com/Dione-b/caatinga-skill), listed as a community skill on [skills.stellar.org](https://skills.stellar.org/) — that teaches an agent Caatinga's hard rules directly: no raw `stellar` CLI deploys, no manual `caatinga.artifacts.json` or generated-binding edits, and `--source` as an identity alias only, never a raw key.
+
+```
+/plugin marketplace add Dione-b/caatinga-skill
+/plugin install caatinga-skill@caatinga-skill
+```
+
 Next up: Check the [Requirements](/docs/getting-started/requirements) or follow the [Installation](/docs/getting-started/installation) guide.

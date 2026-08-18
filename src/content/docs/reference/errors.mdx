@@ -98,6 +98,14 @@ When a command fails, Caatinga returns a structured error payload containing the
 
 ---
 
+### `ZK_CHECKSUM_MISMATCH`
+- **Category**: ZK / Security
+- **Description**: A `circom` binary — freshly downloaded from GitHub or read from the `~/.caatinga/zk-tools` cache — did not match its pinned SHA-256.
+- **Common Causes**: A tampered release asset, an on-path tamperer, or a corrupted/stale cache entry. The mismatching file is deleted automatically.
+- **How to Fix**: Do not blindly retry — verify the release asset yourself before re-running `ctg zk build`. Treat a mismatch as a possible supply-chain compromise, not a flaky download.
+
+---
+
 ### `CAATINGA_ARTIFACT_NOT_FOUND`
 - **Category**: Artifacts
 - **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.

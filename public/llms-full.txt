@@ -555,6 +555,15 @@ Caatinga operates on two source of truth files in your workspace:
   Never edit `caatinga.artifacts.json` manually. Caatinga updates this file atomically during builds and deployments.
 
 
+## Using Caatinga with AI agents
+
+Caatinga ships its own Claude Code skill — [ctg-skills](https://github.com/Dione-b/caatinga-skill), listed as a community skill on [skills.stellar.org](https://skills.stellar.org/) — that teaches an agent Caatinga's hard rules directly: no raw `stellar` CLI deploys, no manual `caatinga.artifacts.json` or generated-binding edits, and `--source` as an identity alias only, never a raw key.
+
+```
+/plugin marketplace add Dione-b/caatinga-skill
+/plugin install caatinga-skill@caatinga-skill
+```
+
 Next up: Check the [Requirements](/docs/getting-started/requirements) or follow the [Installation](/docs/getting-started/installation) guide.
 
 
@@ -784,6 +793,8 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 ### 3.9.2 highlights
 
 - **Security fix**: `identity export`/`import` no longer leave a leftover tarball of Stellar secret keys in `os.tmpdir()`. See [CLI Identity Reference](/docs/cli/identity) for the remediation steps if you ran either command before upgrading.
+- **Security fix**: `identity import` now rejects a tarball if any entry would extract outside the target Stellar config directory (tar path traversal). Only import archives from a trusted source.
+- **Security fix**: the ZK toolchain now verifies every `circom` binary — freshly downloaded or read from the `~/.caatinga/zk-tools` cache — against a pinned SHA-256 before use, deleting and rejecting it (`ZK_CHECKSUM_MISMATCH`) on a mismatch instead of running an unverified binary. See [Errors reference](/docs/reference/errors).
 - **Smaller install**: the published `@caatinga/cli` tarball dropped from 95.3 MB packed / 283.7 MB unpacked to 67.4 kB — the Rust `target/` build directory and `test_snapshots` are now excluded from what gets published.
 - `sync-env` no longer wipes unrelated variables in the target env file; concurrent `deploy`/`upgrade` no longer race on `caatinga.artifacts.json`; `deploy` retries when the RPC hasn't indexed a just-uploaded WASM yet. See [Gotchas](/docs/reference/gotchas) for the full list.
 
@@ -885,6 +896,14 @@ When a command fails, Caatinga returns a structured error payload containing the
 - **Category**: Security / Identity
 - **Description**: The resolved source account failed a safety check (e.g. a `postDeploy` hook `source` override that isn't an allowed alias).
 - **How to Fix**: Ensure any `source` override passed to hooks or commands resolves through `assertSafeSourceAccount`'s allowed identity set.
+
+---
+
+### `ZK_CHECKSUM_MISMATCH`
+- **Category**: ZK / Security
+- **Description**: A `circom` binary — freshly downloaded from GitHub or read from the `~/.caatinga/zk-tools` cache — did not match its pinned SHA-256.
+- **Common Causes**: A tampered release asset, an on-path tamperer, or a corrupted/stale cache entry. The mismatching file is deleted automatically.
+- **How to Fix**: Do not blindly retry — verify the release asset yourself before re-running `ctg zk build`. Treat a mismatch as a possible supply-chain compromise, not a flaky download.
 
 ---
 
