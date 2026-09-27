@@ -588,7 +588,7 @@ Before using Caatinga, ensure your environment meets the prerequisites for Node.
 | **Stellar CLI** | `23.0.0+` | `28.0.0` (last tested) | Used under the hood for WASM operations |
 
 <Warning>
-  Do not use Rust **1.91.0** (or the 1.81–1.83 lines): `stellar contract build` refuses them with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. Use 1.91.1 or newer (`rustup update stable`). `ctg doctor` in 3.10.1 still reports 1.91.0 as OK; this is fixed in the next patch.
+  Do not use Rust **1.91.0** (or the 1.81–1.83 lines): `stellar contract build` refuses them with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. Use 1.91.1 or newer (`rustup update stable`). As of 3.10.2, `ctg doctor` fails the Rust check for these versions (3.10.1 still reported 1.91.0 as OK).
 </Warning>
 
 ## Rust & WASM Setup
@@ -788,16 +788,22 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 
 ## Release & Versioning Policy
 
-- **Latest release**: `3.10.1` (all four packages ship in lockstep). `3.10.0` was versioned but never published to npm.
+- **Latest release**: `3.10.2` (all four packages ship in lockstep). `3.10.0` was versioned but never published to npm.
 - **Status**: v1.0 stable contract on npm major `3.x`. Breaking changes to the Tier 1 surface require a major bump and will land on an explicit `4.0.0`. ZK commands (`ctg zk *`) are experimental and outside the contract.
-- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.10.1`) rather than floating tags.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.10.2`) rather than floating tags.
 - **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **28.0.0**.
-- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.10.1` or later, kept aligned with the release group.
+- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.10.2` or later, kept aligned with the release group.
+
+### 3.10.2 highlights
+
+- **`ctg doctor` rejects Rust toolchains that `stellar contract build` refuses**: the 1.81.x, 1.82.x and 1.83.x lines and exactly **1.91.0** now fail the Rust check with `rustup update stable` as the fix (3.10.1 reported 1.91.0 as OK).
+- `RUST_MIN_VERSION` is **1.91.1**; the blocked list is exported as `RUST_BLOCKED_VERSIONS` from `@caatinga/core/runtime/requirements`.
+- Scaffolds, templates and examples declare `rust-version = "1.91.1"`.
 
 ### 3.10.1 highlights
 
 - **Mainnet always requires confirmation**: `requireConfirmation: false` is ignored on mainnet (detected by name or by the public network passphrase). Unattended runs must pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit log is still printed. The prompt now covers `deploy`, `upgrade`, `invoke`, `wire`, `rollback`, `regression` and ZK invoke, shows the target deployment, and automatic retries are disabled on mainnet.
-- **`ctg doctor` checks the Rust version**: toolchains older than **1.91.0** fail the Rust check with `rustup update stable` as the fix. Note: Rust 1.91.0 itself is rejected by `stellar contract build`, so use **1.91.1+**; the next patch makes `doctor` flag it.
+- **`ctg doctor` checks the Rust version**: toolchains older than **1.91.0** fail the Rust check with `rustup update stable` as the fix. Rust 1.91.0 itself is rejected by `stellar contract build`; 3.10.2 makes `doctor` flag it.
 - **`ctg doctor` / `ctg version` update advisory**: an informational note when the installed CLI is ahead of or behind the npm `latest` tag. It never fails a command; set `CAATINGA_SKIP_UPDATE_CHECK=1` to skip it.
 - **`ctg upgrade` writes a relative `sourcePath`** to `caatinga.artifacts.json`, matching `ctg deploy`. Entries written by earlier upgrades keep their absolute path until the next upgrade or deploy.
 - **Stricter artifacts schema**: malformed `contractId` / `wasmHash` values in `caatinga.artifacts.json` are rejected.
@@ -977,5 +983,5 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 29. **`deploy` retries un-indexed WASM**: If the RPC hasn't yet indexed a just-uploaded WASM hash, `deploy` retries with backoff instead of failing immediately with `CAATINGA_DEPLOY_FAILED`.
 30. **Mainnet confirmation cannot be turned off in config**: As of 3.10.1, `requireConfirmation: false` is ignored on mainnet (by network name or by the public passphrase). In CI, pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit line is still printed.
 31. **`sourcePath` in artifacts is relative**: As of 3.10.1 both `deploy` and `upgrade` store the relative contract path. Artifacts written by an older `ctg upgrade` may still contain an absolute local path until the contract is upgraded or deployed again.
-32. **Rust 1.91.1+, never 1.91.0**: `ctg doctor` fails the Rust check on toolchains older than 1.91.0, but `stellar contract build` also refuses exactly **1.91.0** (and the 1.81–1.83 lines) with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. Run `rustup update stable`.
+32. **Rust 1.91.1+, never 1.91.0**: `stellar contract build` refuses exactly **1.91.0** (and the 1.81–1.83 lines) with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. As of 3.10.2, `ctg doctor` fails the Rust check for these and for anything older than 1.91.1. Run `rustup update stable`.
 
