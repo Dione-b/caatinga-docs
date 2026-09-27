@@ -24,11 +24,21 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 
 ## Release & Versioning Policy
 
-- **Latest release**: `3.9.2` (all four packages ship in lockstep).
+- **Latest release**: `3.10.1` (all four packages ship in lockstep). `3.10.0` was versioned but never published to npm.
 - **Status**: v1.0 stable contract on npm major `3.x`. Breaking changes to the Tier 1 surface require a major bump and will land on an explicit `4.0.0`. ZK commands (`ctg zk *`) are experimental and outside the contract.
-- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.9.2`) rather than floating tags.
-- **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.
-- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.9.1` or later, kept aligned with the release group.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.10.1`) rather than floating tags.
+- **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **28.0.0**.
+- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.10.1` or later, kept aligned with the release group.
+
+### 3.10.1 highlights
+
+- **Mainnet always requires confirmation**: `requireConfirmation: false` is ignored on mainnet (detected by name or by the public network passphrase). Unattended runs must pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit log is still printed. The prompt now covers `deploy`, `upgrade`, `invoke`, `wire`, `rollback`, `regression` and ZK invoke, shows the target deployment, and automatic retries are disabled on mainnet.
+- **`ctg doctor` checks the Rust version**: toolchains older than **1.91.0** fail the Rust check with `rustup update stable` as the fix.
+- **`ctg doctor` / `ctg version` update advisory**: an informational note when the installed CLI is ahead of or behind the npm `latest` tag. It never fails a command; set `CAATINGA_SKIP_UPDATE_CHECK=1` to skip it.
+- **`ctg upgrade` writes a relative `sourcePath`** to `caatinga.artifacts.json`, matching `ctg deploy`. Entries written by earlier upgrades keep their absolute path until the next upgrade or deploy.
+- **Stricter artifacts schema**: malformed `contractId` / `wasmHash` values in `caatinga.artifacts.json` are rejected.
+- **Bounded calls**: subprocess and network calls (including the Horizon lookup in deploy recovery) now time out instead of hanging.
+- **Stellar CLI 28.0.0** is the new last-tested version; contracts, examples and templates use `soroban-sdk` 27.0.6.
 
 ### 3.9.2 highlights
 

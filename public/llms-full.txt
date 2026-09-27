@@ -584,8 +584,8 @@ Before using Caatinga, ensure your environment meets the prerequisites for Node.
 | :--- | :--- | :--- | :--- |
 | **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
 | **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
-| **Rust toolchain** | `1.80+` | `stable` | Target `wasm32v1-none` |
-| **Stellar CLI** | `23.0.0+` | Latest release | Used under the hood for WASM operations |
+| **Rust toolchain** | `1.91.0+` | `stable` | Target `wasm32v1-none`; checked by `ctg doctor` |
+| **Stellar CLI** | `23.0.0+` | `28.0.0` (last tested) | Used under the hood for WASM operations |
 
 ## Rust & WASM Setup
 
@@ -784,11 +784,21 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 
 ## Release & Versioning Policy
 
-- **Latest release**: `3.9.2` (all four packages ship in lockstep).
+- **Latest release**: `3.10.1` (all four packages ship in lockstep). `3.10.0` was versioned but never published to npm.
 - **Status**: v1.0 stable contract on npm major `3.x`. Breaking changes to the Tier 1 surface require a major bump and will land on an explicit `4.0.0`. ZK commands (`ctg zk *`) are experimental and outside the contract.
-- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.9.2`) rather than floating tags.
-- **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **27.0.0**.
-- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.9.1` or later, kept aligned with the release group.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.10.1`) rather than floating tags.
+- **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **28.0.0**.
+- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.10.1` or later, kept aligned with the release group.
+
+### 3.10.1 highlights
+
+- **Mainnet always requires confirmation**: `requireConfirmation: false` is ignored on mainnet (detected by name or by the public network passphrase). Unattended runs must pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit log is still printed. The prompt now covers `deploy`, `upgrade`, `invoke`, `wire`, `rollback`, `regression` and ZK invoke, shows the target deployment, and automatic retries are disabled on mainnet.
+- **`ctg doctor` checks the Rust version**: toolchains older than **1.91.0** fail the Rust check with `rustup update stable` as the fix.
+- **`ctg doctor` / `ctg version` update advisory**: an informational note when the installed CLI is ahead of or behind the npm `latest` tag. It never fails a command; set `CAATINGA_SKIP_UPDATE_CHECK=1` to skip it.
+- **`ctg upgrade` writes a relative `sourcePath`** to `caatinga.artifacts.json`, matching `ctg deploy`. Entries written by earlier upgrades keep their absolute path until the next upgrade or deploy.
+- **Stricter artifacts schema**: malformed `contractId` / `wasmHash` values in `caatinga.artifacts.json` are rejected.
+- **Bounded calls**: subprocess and network calls (including the Horizon lookup in deploy recovery) now time out instead of hanging.
+- **Stellar CLI 28.0.0** is the new last-tested version; contracts, examples and templates use `soroban-sdk` 27.0.6.
 
 ### 3.9.2 highlights
 
@@ -924,7 +934,7 @@ When a command fails, Caatinga returns a structured error payload containing the
 ## Section: Key Gotchas & Architectural Rules
 
 Path: /docs/reference/gotchas
-Description: 29 essential rules, gotchas, and constraints for Caatinga projects.
+Description: 32 essential rules, gotchas, and constraints for Caatinga projects.
 
 # Key Gotchas & Architectural Rules
 
@@ -944,7 +954,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 10. **`caatinga.artifacts.json` is git-versioned**: Commit your artifacts file to version control alongside your application code.
 11. **Binding freshness is tracked automatically**: Managed via `.caatinga-bindings.json` markers (`fresh`, `stale`, `missing`, `unknown`).
 12. **`ctg doctor` deploy coverage is advisory**: Un-deployed contracts produce warnings but do not block CI exit code even with `--strict`.
-13. **Stellar CLI compatibility**: Hard floor is **23.0.0**; last tested is **27.0.0**. Newer versions output advisory warnings.
+13. **Stellar CLI compatibility**: Hard floor is **23.0.0**; last tested is **28.0.0**. Newer versions output advisory warnings.
 14. **`buildRoot`**: When specified, runs a single `stellar contract build` from the Cargo workspace root rather than per-contract crate builds.
 15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
 16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
@@ -961,4 +971,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 27. **Concurrent `deploy`/`upgrade` are safe as of 3.9.2**: Artifact writes to `caatinga.artifacts.json` are serialized with a lockfile and re-read inside the lock, so two processes running at once can no longer drop each other's `contractId`.
 28. **`parseContractId` prefers labeled output**: As of 3.9.2 it favors the last explicitly labeled contract-ID line, then the last standalone ID line, then the last bare match — and only matches the base32 alphabet (`A-Z2-7`) real strkeys use — so a diagnostic line printed before the real result can no longer be mistaken for the deployed contract ID.
 29. **`deploy` retries un-indexed WASM**: If the RPC hasn't yet indexed a just-uploaded WASM hash, `deploy` retries with backoff instead of failing immediately with `CAATINGA_DEPLOY_FAILED`.
+30. **Mainnet confirmation cannot be turned off in config**: As of 3.10.1, `requireConfirmation: false` is ignored on mainnet (by network name or by the public passphrase). In CI, pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit line is still printed.
+31. **`sourcePath` in artifacts is relative**: As of 3.10.1 both `deploy` and `upgrade` store the relative contract path. Artifacts written by an older `ctg upgrade` may still contain an absolute local path until the contract is upgraded or deployed again.
+32. **Rust 1.91.0+**: `ctg doctor` fails the Rust check on older toolchains. Run `rustup update stable`.
 
