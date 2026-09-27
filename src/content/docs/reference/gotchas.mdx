@@ -1,6 +1,6 @@
 ---
 title: Key Gotchas & Architectural Rules
-description: 29 essential rules, gotchas, and constraints for Caatinga projects.
+description: 32 essential rules, gotchas, and constraints for Caatinga projects.
 sidebar:
   order: 3
 ---
@@ -23,7 +23,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 10. **`caatinga.artifacts.json` is git-versioned**: Commit your artifacts file to version control alongside your application code.
 11. **Binding freshness is tracked automatically**: Managed via `.caatinga-bindings.json` markers (`fresh`, `stale`, `missing`, `unknown`).
 12. **`ctg doctor` deploy coverage is advisory**: Un-deployed contracts produce warnings but do not block CI exit code even with `--strict`.
-13. **Stellar CLI compatibility**: Hard floor is **23.0.0**; last tested is **27.0.0**. Newer versions output advisory warnings.
+13. **Stellar CLI compatibility**: Hard floor is **23.0.0**; last tested is **28.0.0**. Newer versions output advisory warnings.
 14. **`buildRoot`**: When specified, runs a single `stellar contract build` from the Cargo workspace root rather than per-contract crate builds.
 15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
 16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
@@ -40,3 +40,6 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 27. **Concurrent `deploy`/`upgrade` are safe as of 3.9.2**: Artifact writes to `caatinga.artifacts.json` are serialized with a lockfile and re-read inside the lock, so two processes running at once can no longer drop each other's `contractId`.
 28. **`parseContractId` prefers labeled output**: As of 3.9.2 it favors the last explicitly labeled contract-ID line, then the last standalone ID line, then the last bare match — and only matches the base32 alphabet (`A-Z2-7`) real strkeys use — so a diagnostic line printed before the real result can no longer be mistaken for the deployed contract ID.
 29. **`deploy` retries un-indexed WASM**: If the RPC hasn't yet indexed a just-uploaded WASM hash, `deploy` retries with backoff instead of failing immediately with `CAATINGA_DEPLOY_FAILED`.
+30. **Mainnet confirmation cannot be turned off in config**: As of 3.10.1, `requireConfirmation: false` is ignored on mainnet (by network name or by the public passphrase). In CI, pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit line is still printed.
+31. **`sourcePath` in artifacts is relative**: As of 3.10.1 both `deploy` and `upgrade` store the relative contract path. Artifacts written by an older `ctg upgrade` may still contain an absolute local path until the contract is upgraded or deployed again.
+32. **Rust 1.91.1+, never 1.91.0**: `stellar contract build` refuses exactly **1.91.0** (and the 1.81–1.83 lines) with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. As of 3.10.2, `ctg doctor` fails the Rust check for these and for anything older than 1.91.1. Run `rustup update stable`.
