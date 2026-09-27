@@ -15,8 +15,12 @@ Before using Caatinga, ensure your environment meets the prerequisites for Node.
 | :--- | :--- | :--- | :--- |
 | **Node.js** | `>=22.0.0` | `22.x LTS` | Required to run Caatinga CLI & client |
 | **pnpm / npm** | `pnpm >= 9` | `pnpm` | Package manager |
-| **Rust toolchain** | `1.91.0+` | `stable` | Target `wasm32v1-none`; checked by `ctg doctor` |
+| **Rust toolchain** | `1.91.1+` | `stable` | Target `wasm32v1-none`; checked by `ctg doctor`. Avoid `1.91.0` (see below) |
 | **Stellar CLI** | `23.0.0+` | `28.0.0` (last tested) | Used under the hood for WASM operations |
+
+<Warning>
+  Do not use Rust **1.91.0** (or the 1.81–1.83 lines): `stellar contract build` refuses them with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. Use 1.91.1 or newer (`rustup update stable`). `ctg doctor` in 3.10.1 still reports 1.91.0 as OK; this is fixed in the next patch.
+</Warning>
 
 ## Rust & WASM Setup
 

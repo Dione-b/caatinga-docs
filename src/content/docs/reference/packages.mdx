@@ -33,7 +33,7 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 ### 3.10.1 highlights
 
 - **Mainnet always requires confirmation**: `requireConfirmation: false` is ignored on mainnet (detected by name or by the public network passphrase). Unattended runs must pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit log is still printed. The prompt now covers `deploy`, `upgrade`, `invoke`, `wire`, `rollback`, `regression` and ZK invoke, shows the target deployment, and automatic retries are disabled on mainnet.
-- **`ctg doctor` checks the Rust version**: toolchains older than **1.91.0** fail the Rust check with `rustup update stable` as the fix.
+- **`ctg doctor` checks the Rust version**: toolchains older than **1.91.0** fail the Rust check with `rustup update stable` as the fix. Note: Rust 1.91.0 itself is rejected by `stellar contract build`, so use **1.91.1+**; the next patch makes `doctor` flag it.
 - **`ctg doctor` / `ctg version` update advisory**: an informational note when the installed CLI is ahead of or behind the npm `latest` tag. It never fails a command; set `CAATINGA_SKIP_UPDATE_CHECK=1` to skip it.
 - **`ctg upgrade` writes a relative `sourcePath`** to `caatinga.artifacts.json`, matching `ctg deploy`. Entries written by earlier upgrades keep their absolute path until the next upgrade or deploy.
 - **Stricter artifacts schema**: malformed `contractId` / `wasmHash` values in `caatinga.artifacts.json` are rejected.
