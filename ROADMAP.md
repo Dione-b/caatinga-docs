@@ -38,7 +38,7 @@ Deploy
 
 Este projeto ainda não tem páginas de conteúdo publicadas; até lá, `caatinga/docs/` (no monorepo) é a fonte autoritativa e deve ser conferida sempre que uma sprint de conteúdo (Fase 2) for executada, em vez de reescrever do zero. Estado mais recente relevante para migração:
 
-- **Versão atual:** `@caatinga/cli` `3.10.2` (a `3.10.0` foi versionada mas nunca publicada no npm).
+- **Versão atual:** `@caatinga/cli` `3.10.3` (a `3.10.0` foi versionada mas nunca publicada no npm).
 - **Dois fixes de segurança recentes** a cobrir nos Sprints 22 (Error reference) e 23 (Troubleshooting): tar path traversal em `ctg identity import`, e verificação de checksum pinado no download do `circom` (novo código `ZK_CHECKSUM_MISMATCH`). Já documentados em `caatinga/docs/troubleshooting.md` ("Security fixes"), `caatinga/docs/errors.md` e `caatinga/docs/zk.md` — usar como base ao escrever as páginas equivalentes aqui.
 - **Skill do Claude Code:** o plugin de Claude Code de Caatinga — [`ctg-skills`](https://github.com/Dione-b/caatinga-skill) (`/plugin marketplace add Dione-b/caatinga-skill` → `/plugin install caatinga-skill@caatinga-skill`) — está listado (como community skill, não na seção "Official Stellar Skills") em [skills.stellar.org](https://skills.stellar.org/). Já referenciado em `caatinga/README.md` e `caatinga/docs/tutorials/integration-guide.md`; precisa de entrada própria em **Resources** (ver estrutura de navegação acima, link para skills.stellar.org) e menção na Sprint 27 (CI/CD) ou Sprint 9 (Getting Started) como forma recomendada de usar Caatinga com agentes de IA.
 

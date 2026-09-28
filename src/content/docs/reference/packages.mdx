@@ -24,11 +24,19 @@ Caatinga is published as modular TypeScript npm packages under the `@caatinga` s
 
 ## Release & Versioning Policy
 
-- **Latest release**: `3.10.2` (all four packages ship in lockstep). `3.10.0` was versioned but never published to npm.
+- **Latest release**: `3.10.3` (all four packages ship in lockstep). `3.10.0` was versioned but never published to npm.
 - **Status**: v1.0 stable contract on npm major `3.x`. Breaking changes to the Tier 1 surface require a major bump and will land on an explicit `4.0.0`. ZK commands (`ctg zk *`) are experimental and outside the contract.
-- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.10.2`) rather than floating tags.
+- **Reproducible CI**: Pin an exact version (e.g. `@caatinga/cli@3.10.3`) rather than floating tags.
 - **Stellar CLI Compatibility**: Hard floor **23.0.0**; last tested **28.0.0**.
-- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.10.2` or later, kept aligned with the release group.
+- **`@caatinga/cli` dependency ranges**: `@caatinga/core` and `@caatinga/zk` `^3.10.3` or later, kept aligned with the release group.
+
+### 3.10.3 highlights
+
+Recommended for anyone targeting mainnet: with the default mainnet config, 3.10.2 and earlier could not reach mainnet at all.
+
+- **Mainnet commands use the configured RPC**: configs matching the well-known mainnet network were passed to the Stellar CLI as `--network mainnet`, whose built-in entry has no RPC URL, so commands failed with `Invalid URL Bring Your Own: …` (or silently used a locally added `mainnet` network). Mainnet now always gets explicit `--rpc-url` / `--network-passphrase` from `caatinga.config.ts`.
+- **No implicit `alice` on mainnet**: `ctg read` and `ctg smoke` require `--source` or `CAATINGA_SOURCE` on mainnet; otherwise they fail with `CAATINGA_SOURCE_ACCOUNT_REQUIRED`. Testnet still falls back to `alice`.
+- **ZK dev-ceremony block detects mainnet by passphrase**: a mainnet network with a custom name (e.g. `pubnet`) is now blocked too.
 
 ### 3.10.2 highlights
 
