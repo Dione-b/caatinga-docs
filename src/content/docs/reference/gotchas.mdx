@@ -1,6 +1,6 @@
 ---
 title: Key Gotchas & Architectural Rules
-description: 32 essential rules, gotchas, and constraints for Caatinga projects.
+description: 34 essential rules, gotchas, and constraints for Caatinga projects.
 sidebar:
   order: 3
 ---
@@ -15,7 +15,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 2. **Deploy auto-generates bindings**: Pass `--no-generate` if you wish to skip binding generation during CI deploys.
 3. **Full graph deploy auto-runs `wire` + `sync-env`**: Pass `--no-wire` or `--no-sync-env` to disable post-deploy hooks and environment synchronization. As of 3.9.2, `sync-env` no longer wipes the target env file — only the keys mapped in `frontend.env` are rewritten; unrelated assignments, comments, and blank lines are left untouched, and new keys are appended. (Before 3.9.2 it rebuilt the whole file, silently destroying other variables like API keys.)
 4. **Browser invoke is single-invoker only until v1.0**: Multi-signer transactions (`signAuthEntry`) require custom application code and throw `CAATINGA_MULTI_AUTH_REQUIRED`.
-5. **ZK on mainnet is blocked by default**: Dev ceremony artifacts require `--allow-dev-ceremony` to deploy on mainnet.
+5. **ZK on mainnet is blocked by default**: Dev ceremony artifacts require `--allow-dev-ceremony` to build, deploy or invoke on mainnet. As of 3.10.3, mainnet is detected by network name **or** by the public passphrase, so renaming the network (e.g. `pubnet`) does not bypass the block.
 6. **Fresh machine setup**: Install Node 22+, Rust, and Stellar CLI manually, then verify with `npx ctg doctor`.
 7. **Errors are public API**: Machine-readable `CAATINGA_*` error codes must be parsed by scripts instead of parsing raw stdout/stderr text messages.
 8. **`read()` vs `invoke()`**: `read()` is a read-only simulation (no key signing, no network transaction); `invoke()` signs and submits an on-chain transaction.
@@ -43,3 +43,5 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 30. **Mainnet confirmation cannot be turned off in config**: As of 3.10.1, `requireConfirmation: false` is ignored on mainnet (by network name or by the public passphrase). In CI, pass `--yes` or set `CAATINGA_ASSUME_YES=true`; the `[MAINNET GUARDRAIL]` audit line is still printed.
 31. **`sourcePath` in artifacts is relative**: As of 3.10.1 both `deploy` and `upgrade` store the relative contract path. Artifacts written by an older `ctg upgrade` may still contain an absolute local path until the contract is upgraded or deployed again.
 32. **Rust 1.91.1+, never 1.91.0**: `stellar contract build` refuses exactly **1.91.0** (and the 1.81–1.83 lines) with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. As of 3.10.2, `ctg doctor` fails the Rust check for these and for anything older than 1.91.1. Run `rustup update stable`.
+33. **Source identity is required on mainnet**: `deploy`, `invoke` and `upgrade` always require `--source`. As of 3.10.3, `ctg read` and `ctg smoke` also refuse the built-in `alice` fallback on mainnet: pass `--source <alias>` or set `CAATINGA_SOURCE`, otherwise they fail with `CAATINGA_SOURCE_ACCOUNT_REQUIRED`.
+34. **Mainnet uses your `rpcUrl`, not the Stellar CLI's `mainnet` entry**: The Stellar CLI's built-in `mainnet` network has no RPC URL ("Bring Your Own"). Caatinga 3.10.3+ always passes the configured `rpcUrl` and `networkPassphrase` explicitly on mainnet. On 3.10.2 or earlier, mainnet commands fail with `Invalid URL Bring Your Own: …`; upgrade instead of adding a local `stellar network add mainnet`.

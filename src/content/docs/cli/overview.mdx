@@ -35,8 +35,8 @@ Run `ctg doctor` before changing deploy state or troubleshooting the environment
 | **`ctg generate`** | Generate TS client bindings | `--output`, `--network` |
 | **`ctg status`** | Display deployed contract state & binding freshness | `--network`, `--strict` |
 | **`ctg invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg`, `--source` |
-| **`ctg read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg`, `--expect`, `--summary`, `--quiet` |
-| **`ctg smoke`** | Run post-deployment smoke tests | `--network` |
+| **`ctg read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg`, `--expect`, `--summary`, `--quiet`, `--source` (required on mainnet) |
+| **`ctg smoke`** | Run post-deployment smoke tests | `--network`, `--source` (required on mainnet) |
 | **`ctg regression`** | Local CI recipe: test → build → deploy → generate → smoke | `--network`, `--source` |
 | **`ctg ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
 | **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import` |
