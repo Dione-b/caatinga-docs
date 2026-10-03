@@ -1,0 +1,2 @@
+# Single canonical domain: send the Netlify default domain to caatinga.xyz.
+https://docs-caatinga.netlify.app/* https://caatinga.xyz/:splat 301!
