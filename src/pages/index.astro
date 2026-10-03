@@ -42,12 +42,13 @@ import ElectronicFlowBackground from "@components/ElectronicFlowBackground.astro
 
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto pt-2">
             <Button variant="primary" href="/docs" class="w-full sm:w-auto min-w-[140px] text-center justify-center">Get Started</Button>
+            <Button variant="secondary" href="/docs/getting-started/existing-project" class="w-full sm:w-auto min-w-[140px] text-center justify-center">Add to an Existing Project</Button>
             <Button variant="secondary" href="https://github.com/Dione-b/caatinga" class="w-full sm:w-auto min-w-[140px] text-center justify-center">GitHub Repository</Button>
           </div>
 
           <div class="mt-6 w-full max-w-md rounded-lg border border-border bg-surface p-3 sm:p-4 font-mono text-xs sm:text-sm text-ink flex items-center justify-between gap-2 shadow-sm overflow-x-auto min-w-0">
             <span class="text-muted shrink-0">$</span>
-            <code class="text-ink font-semibold truncate sm:whitespace-normal">npx ctg init my-dapp</code>
+            <code class="text-ink font-semibold truncate sm:whitespace-normal">npm i -D @caatinga/cli</code>
             <Badge variant="success" class="shrink-0">v1.0</Badge>
           </div>
         </div>

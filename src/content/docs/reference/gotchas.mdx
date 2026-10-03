@@ -28,7 +28,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
 16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
 17. **`postDeploy` expect**: Verified with the [Expect DSL](/docs/configuration/expect-dsl): a plain string or `{ matcher, value? }` with `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`.
-18. **`frontend.env` sources**: Each value is a contract name (its `contractId`), `<contract>.wasmHash`, or one of `network`, `rpcUrl`, `networkPassphrase`. Env sync runs automatically only on a full-graph deploy when both `frontend.envFile` and `frontend.env` are set; otherwise run `ctg sync-env`.
+18. **`frontend.env` maps source → env var name**: Each key is a contract name (its `contractId`), `<contract>.wasmHash`, or one of `network`, `rpcUrl`, `networkPassphrase`; each value is the env var to write (e.g. `{ token: "VITE_TOKEN_ID" }`). Env sync runs automatically only on a full-graph deploy when both `frontend.envFile` and `frontend.env` are set; otherwise run `ctg sync-env`.
 19. **`doctor --strict`**: Fails on environment drift (`--strict-env`) and stale bindings (`--strict-bindings`).
 20. **`ctg regression`**: Local execution recipe mirroring CI: `pnpm test → build → deploy --if-changed → generate → smoke` (the test step runs `pnpm test` even in npm projects; skip it with `--skip-test`).
 21. **Alias resolution**: Method arguments accept `${source.address}` or CLI identity aliases (length ≥ 3).
