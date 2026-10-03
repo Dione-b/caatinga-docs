@@ -10,7 +10,7 @@ Soroban/Stellar smart-contract developers using the Caatinga CLI, ranging from f
 
 ## Product Purpose
 
-Replace the current VitePress-based docs with a purpose-built developer portal for Caatinga (deployment orchestration + versioned artifacts for Soroban). Success looks like: a developer can go from zero to a deployed, invokable contract without leaving the docs, and later find any CLI flag, config property, or error code in seconds. The site and `llms-full.txt` are generated from the same MDX content, so humans and agents never see diverging information.
+A purpose-built developer portal for Caatinga (deployment orchestration + versioned artifacts for Soroban). Success looks like: a developer can go from zero to a deployed, invokable contract without leaving the docs, and later find any CLI flag, config property, or error code in seconds. The site and `llms-full.txt` are generated from the same MDX content, so humans and agents never see diverging information.
 
 ## Brand Personality
 
@@ -20,7 +20,7 @@ The site has one deliberate exception: the homepage (Sprint 7) is brand-register
 
 ## Anti-references
 
-- The current docs' VitePress default theme — generic framework-docs look is exactly what this rebuild replaces.
+- A default docs-framework theme — the generic framework-docs look.
 - Generic corporate SaaS: blue-gradient hero, stock-photo icons, enterprise-landing-page tone.
 - Any AI-generated-interface tells: cream/sand body backgrounds, gradient text, side-stripe card borders, tiny uppercase tracked eyebrows on every section, numbered 01/02/03 scaffolding where the content isn't actually a sequence.
 

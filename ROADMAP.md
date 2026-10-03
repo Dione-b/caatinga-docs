@@ -4,7 +4,7 @@ Objetivo: reconstruir a documentação do Caatinga como um developer portal pró
 
 A documentação deve continuar refletindo o modelo atual do Caatinga: deployment orchestration + versioned artifacts para Soroban, com o fluxo `init → build → deploy → generate → invoke/read`.
 
-Fonte de consulta para a documentação atual (para migração/paridade): https://dione-b.github.io/caatinga/for-llms.html
+Site publicado: https://caatinga.xyz (versão para agentes: https://caatinga.xyz/llms-full.txt).
 
 ## Stack
 
@@ -22,7 +22,7 @@ Build
 └── llms-full.txt
 
 Deploy
-└── GitHub Pages
+└── caatinga.xyz
 ```
 
 ## Decisões do Sprint 0
@@ -31,7 +31,7 @@ Deploy
 - Repositório: separado do monorepo `caatinga` (não aninhado)
 - Licença: MIT
 - Node mínimo: 22
-- Deploy: GitHub Pages em novo repositório — `dione-b.github.io/caatinga-docs`
+- Deploy: `caatinga.xyz`, publicado a partir da `main`
 - Versionamento da documentação: desbloqueado — o projeto saiu de Alpha (ver Sprint 31)
 
 ## Notas de sincronização com `caatinga` (fonte real)
@@ -226,6 +226,6 @@ CAATINGA
 
 **Sprint 43 — Correções do beta.** Navegação confusa, conteúdo duplicado, exemplos quebrados, links quebrados, terminologia inconsistente, CLI desatualizada, problemas mobile.
 
-**Sprint 44 — Production release.** Astro build → GitHub Actions → GitHub Pages → Production.
+**Sprint 44 — Production release.** Astro build → deploy da `main` → `caatinga.xyz`.
 
 **Sprint 45 — Documentation governance.** Regra: `Feature sem documentação = incomplete`. Fluxo: New CLI feature → Implementation → Tests → CLI docs → Recipe → LLM docs.
