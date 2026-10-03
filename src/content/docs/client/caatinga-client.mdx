@@ -13,8 +13,9 @@ The `@caatinga/client` package provides a browser-safe, strongly-typed interface
 
 ```typescript
 import { createCaatingaClient } from "@caatinga/client";
+import type { CaatingaArtifacts } from "@caatinga/core/browser";
 import * as Counter from "./contracts/generated/counter";
-import artifacts from "../caatinga.artifacts.json";
+import artifactsJson from "../caatinga.artifacts.json";
 
 const client = createCaatingaClient({
   network: {
@@ -22,8 +23,9 @@ const client = createCaatingaClient({
     rpcUrl: "https://soroban-testnet.stellar.org",
     networkPassphrase: "Test SDF Network ; September 2015",
   },
-  artifacts,
-  wallet: myWalletAdapter,
+  // JSON imports widen `version` to number; the cast restores the artifacts schema type.
+  artifacts: artifactsJson as CaatingaArtifacts,
+  wallet: myWalletAdapter, // optional since 3.12.0 — needed only for invoke()
   contracts: {
     counter: {
       binding: Counter,
@@ -35,14 +37,19 @@ const client = createCaatingaClient({
 
 ## 2. Invocation Methods
 
-### `read<T>(method, args?)`
+### `read<T>(method, args?, options?)`
 Read-only call. Simulates execution and returns the parsed value directly without requiring transaction signing.
+
+As of 3.12.0, `read()` and `simulate()` work **without a connected wallet**. The simulation source
+account is, in order: the per-call `sourceAccount` option, the connected wallet's public key,
+`readSourceAccount` from the client config, then `DEFAULT_READ_SOURCE_ACCOUNT` (exported; the Stellar
+null account, never sent to RPC).
 
 ```typescript
 const count = await client.contract("counter").read<number>("get");
 ```
 
-### `simulate<T>(method, options?)`
+### `simulate<T>(method, args?, options?)`
 Simulates execution and returns the raw simulation result payload (including cost, events, and raw XDR).
 
 ```typescript
@@ -84,6 +91,7 @@ await session.restore(); // Silent reconnect on page load
 
 ```tsx
 import { WalletProvider, useWallet } from "@caatinga/client/react";
+// useWalletSession() returns the underlying session (must be inside WalletProvider).
 
 function App() {
   return (

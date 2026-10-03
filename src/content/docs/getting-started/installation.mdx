@@ -47,11 +47,30 @@ Run `ctg doctor` to run system checks against your environment:
 npx ctg doctor
 ```
 
-Output:
+Abbreviated output in a freshly scaffolded project (versions vary):
 
 ```text
-✓ Node.js version >= 22.0.0
-✓ Rust toolchain installed (wasm32v1-none target active)
-✓ Stellar CLI detected in PATH
-✓ Config caatinga.config.ts validated
+ℹ Caatinga Doctor
+
+ℹ ✓ Node.js 22.22.0
+ℹ ✓ Stellar CLI 28.0.0
+ℹ ✓ @stellar/stellar-sdk 16.3.1
+ℹ ✓ rustc 1.91.1 (<commit> <date>)
+ℹ ✓ wasm32v1-none target installed
+ℹ ✓ Project dependencies installed
+ℹ ✓ caatinga.config.ts found
+ℹ ✓ caatinga.artifacts.json found
+ℹ ✓ network (skipped — no --network provided)
+ℹ ✓ source identity (skipped — no --source provided)
 ```
+
+Advisory sections follow for the default network (deploy coverage, env sync, bindings); before the
+first deploy they list what is still missing, which does not fail the check.
+
+<Callout type="note">
+  On 3.12.0, `@stellar/stellar-sdk` 16.1 or newer (what `^16.0.1` resolves to today) prints a
+  `STELLAR_SDK_UNTESTED_VERSION` advisory, because the last-tested version is still `16.0.1`. It is
+  informational and does not block.
+</Callout>
+
+Run it inside a project: before `ctg init`, the config and artifacts checks fail and doctor ends with `Status: blocked`. Pass `--network <name>` to check another network and `--source alice` to check that the identity alias exists. Doctor makes no RPC calls and does not check account balances.

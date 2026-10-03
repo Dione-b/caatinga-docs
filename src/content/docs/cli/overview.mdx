@@ -25,22 +25,29 @@ Run `ctg doctor` before changing deploy state or troubleshooting the environment
 
 | Command | Description | Common Flags |
 | :--- | :--- | :--- |
-| **`ctg init`** | Scaffold new Soroban project | `<name>`, `--template`, `--minimal` |
-| **`ctg doctor`** | Health check of toolchain & config | `--strict`, `--strict-env`, `--strict-bindings` |
-| **`ctg build`** | Compile Rust contracts to WASM | `--release`, `--contract` |
-| **`ctg deploy`** | Deploy WASM binaries following DAG | `--network`, `--source`, `--upgrade`, `--if-changed`, `--no-generate`, `--no-wire`, `--no-sync-env` |
-| **`ctg upgrade`** | In-place WASM upgrade on existing instance | `--network`, `--source`, `--if-changed`, `--no-build`, `--generate` |
-| **`ctg wire`** | Execute `postDeploy` hooks after deployment | `--network`, `--source` |
-| **`ctg sync-env`** | Merge deployed contract IDs into `frontend.env` | `--network` |
-| **`ctg generate`** | Generate TS client bindings | `--output`, `--network` |
-| **`ctg status`** | Display deployed contract state & binding freshness | `--network`, `--strict` |
-| **`ctg invoke`** | Execute state-changing contract calls | `<contract> <fn>`, `--arg`, `--source` |
-| **`ctg read`** | Simulate read-only contract state queries | `<contract> <fn>`, `--arg`, `--expect`, `--summary`, `--quiet`, `--source` (required on mainnet) |
-| **`ctg smoke`** | Run post-deployment smoke tests | `--network`, `--source` (required on mainnet) |
-| **`ctg regression`** | Local CI recipe: test → build → deploy → generate → smoke | `--network`, `--source` |
-| **`ctg ci`** | Run full CI build, deploy, & validation suite | `--network`, `--source` |
-| **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import` |
-| **`ctg zk`** | Circom Groth16 ZK proof helpers | `--allow-dev-ceremony` |
+| **`ctg init`** | Scaffold new Soroban project | `<name>`, `-t, --template`, `--minimal` (alias `--empty`) |
+| **`ctg doctor`** | Health check of toolchain & config | `--network`, `--source`, `--all-networks`, `--strict`, `--strict-env`, `--strict-bindings` |
+| **`ctg build`** | Compile Rust contracts to WASM | `[contract]` (omit to build every contract) |
+| **`ctg deploy`** | Deploy WASM binaries following DAG | `[contract]`, `--network`, `--source`, `-y`, `--force`, `--upgrade`, `--if-changed`, `--dry-run`, `--no-deps`, `--no-generate`, `--no-wire`, `--no-sync-env` |
+| **`ctg upgrade`** | In-place WASM upgrade on existing instance | `<contract>`, `--network`, `--source`, `-y`, `--if-changed`, `--expected-hash`, `--no-build`, `--generate`, `--sync-env` |
+| **`ctg estimate deploy`** | Simulate a deploy and print the fee estimate | `<contract>`, `--network`, `--source` (required) |
+| **`ctg inspect`** | Compare a deployed contract with its local artifact | `<contract>`, `--network` |
+| **`ctg rollback`** | Restore a previous `contractId` from artifact history (local only) | `<contract>`, `--to <contractId>`, `--network`, `-y` |
+| **`ctg migrate artifacts`** | Upgrade `caatinga.artifacts.json` to the current schema | — |
+| **`ctg wire`** | Run `postDeploy` / `postDeployRead` hooks | `--network`, `--source`, `-y` |
+| **`ctg sync-env`** | Write `frontend.envFile` from the `frontend.env` mapping | `--network` |
+| **`ctg generate`** | Generate TS client bindings | `[contract]`, `--network`, `--strict-network` |
+| **`ctg status`** | Local artifacts + binding freshness table (no RPC) | `--network`, `--json`, `--strict` |
+| **`ctg invoke`** | Execute state-changing contract calls | `<contract>.<method>`, `--<arg> <value>`, `--source`, `-y`, `--no-resolve-aliases` |
+| **`ctg read`** | Simulate read-only contract state queries | `<contract>.<method>`, `--<arg> <value>`, `--expect`, `--summary`, `--quiet`, `--source` (required on mainnet) |
+| **`ctg smoke`** | Run read-only smoke checks from `smoke.reads` / `postDeployRead` | `--network`, `--source` (required on mainnet) |
+| **`ctg regression`** | Local CI recipe: `pnpm test` → build → deploy `--if-changed` → generate → smoke | `--source` (required), `--network`, `-y`, `--skip-<step>` |
+| **`ctg ci run`** | CI helper: doctor → smoke, re-running the installed `ctg` | `--network`, `--source`, `--strict`, `--skip-smoke` |
+| **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import <archive>`, `--path` |
+| **`ctg version`** | Print the CLI version and the npm dist-tag advisory | — |
+| **`ctg zk`** | Circom Groth16 ZK proof helpers (`init`, `build`, `prove`, `invoke`) | `--allow-dev-ceremony` |
+
+`-y, --yes` skips the mainnet confirmation prompt (or set `CAATINGA_ASSUME_YES=true`).
 
 <Callout type="warning">
   `ctg generate` fails with `CAATINGA_INVALID_CONFIG` unless `frontend.bindingsOutput` is set in `caatinga.config.ts` — which is the case for every `--minimal` project. `doctor` and `status` only recommend running `generate` once it can actually succeed. See [`CAATINGA_INVALID_CONFIG`](/docs/reference/errors) for the exact snippet to add.

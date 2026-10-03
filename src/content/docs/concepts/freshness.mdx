@@ -28,10 +28,10 @@ Inside `src/contracts/generated/<contract>/.caatinga-bindings.json`:
 
 ```json
 {
-  "contract": "counter",
-  "network": "testnet",
+  "version": 1,
   "contractId": "C...",
   "wasmHash": "...",
+  "network": "testnet",
   "generatedAt": "2026-01-01T00:00:00.000Z"
 }
 ```
@@ -44,4 +44,4 @@ Run `ctg status --strict` in CI or locally to verify binding freshness across al
 npx ctg status --network testnet --strict
 ```
 
-If any deployed contract has bindings other than `fresh`, `ctg status --strict` exits with code `1`.
+If any deployed contract has bindings other than `fresh` (`stale`, `missing`, or `unknown`), `ctg status --strict` exits with code `1`. `ctg status` reads local files only; use `ctg inspect <contract>` to check that a contract is reachable on the network.

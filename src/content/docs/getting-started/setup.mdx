@@ -45,14 +45,14 @@ Deploy your contracts using your configured network and Stellar identity:
 npx ctg deploy --network testnet --source alice
 ```
 
-Caatinga resolves dependencies, deploys the WASM binaries on-chain, and writes contract metadata to `caatinga.artifacts.json`.
+Caatinga resolves dependencies, deploys the WASM binaries on-chain, and writes contract metadata to `caatinga.artifacts.json`. It also generates TypeScript bindings (skip with `--no-generate`) and, on a full-graph deploy, runs `postDeploy` wiring and writes the frontend `.env.local`.
 
 ## Step 5: Generate Bindings & Invoke
 
-Generate TypeScript bindings for your frontend:
+Deploy already generated the bindings. Run `generate` yourself to regenerate them, or after `deploy --no-generate`:
 
 ```bash
-npx ctg generate
+npx ctg generate --network testnet
 ```
 
 <Callout type="note">
@@ -65,14 +65,14 @@ npx ctg generate
   ```
 </Callout>
 
-Now invoke contract functions directly:
+Now invoke contract functions directly. The target is `<contract>.<method>`; contract arguments are passed as named flags (`--<arg> <value>`):
 
 ```bash
-npx ctg invoke counter increment --source alice
+npx ctg invoke counter.increment --network testnet --source alice
 ```
 
-Read the updated balance/counter state:
+Read the updated counter state (a simulation — no signing):
 
 ```bash
-npx ctg read counter value
+npx ctg read counter.get --network testnet
 ```

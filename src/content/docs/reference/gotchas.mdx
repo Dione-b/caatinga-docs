@@ -1,6 +1,6 @@
 ---
 title: Key Gotchas & Architectural Rules
-description: 34 essential rules, gotchas, and constraints for Caatinga projects.
+description: 38 essential rules, gotchas, and constraints for Caatinga projects.
 sidebar:
   order: 3
 ---
@@ -14,7 +14,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 1. **`--source` must be a CLI identity alias**: Always use an alias (e.g. `alice`). Never pass a public key (`G...`), secret key (`S...`), or seed phrase.
 2. **Deploy auto-generates bindings**: Pass `--no-generate` if you wish to skip binding generation during CI deploys.
 3. **Full graph deploy auto-runs `wire` + `sync-env`**: Pass `--no-wire` or `--no-sync-env` to disable post-deploy hooks and environment synchronization. As of 3.9.2, `sync-env` no longer wipes the target env file — only the keys mapped in `frontend.env` are rewritten; unrelated assignments, comments, and blank lines are left untouched, and new keys are appended. (Before 3.9.2 it rebuilt the whole file, silently destroying other variables like API keys.)
-4. **Browser invoke is single-invoker only until v1.0**: Multi-signer transactions (`signAuthEntry`) require custom application code and throw `CAATINGA_MULTI_AUTH_REQUIRED`.
+4. **Browser invoke is single-invoker**: Multi-signer transactions (`signAuthEntry`) require custom application code and throw `CAATINGA_MULTI_AUTH_REQUIRED`.
 5. **ZK on mainnet is blocked by default**: Dev ceremony artifacts require `--allow-dev-ceremony` to build, deploy or invoke on mainnet. As of 3.10.3, mainnet is detected by network name **or** by the public passphrase, so renaming the network (e.g. `pubnet`) does not bypass the block.
 6. **Fresh machine setup**: Install Node 22+, Rust, and Stellar CLI manually, then verify with `npx ctg doctor`.
 7. **Errors are public API**: Machine-readable `CAATINGA_*` error codes must be parsed by scripts instead of parsing raw stdout/stderr text messages.
@@ -27,10 +27,10 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 14. **`buildRoot`**: When specified, runs a single `stellar contract build` from the Cargo workspace root rather than per-contract crate builds.
 15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
 16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
-17. **`postDeploy` expect**: Verified using the Expect DSL matchers (`equals`, `contains`, `matches`, `isArray`, `isNull`).
-18. **`frontend.env` suffixes**: Keys support `.contractId` (default), `.wasmHash`, `.deployedAt`, and `.wasmPath` suffixes.
+17. **`postDeploy` expect**: Verified with the [Expect DSL](/docs/configuration/expect-dsl): a plain string or `{ matcher, value? }` with `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`.
+18. **`frontend.env` sources**: Each value is a contract name (its `contractId`), `<contract>.wasmHash`, or one of `network`, `rpcUrl`, `networkPassphrase`. Env sync runs automatically only on a full-graph deploy when both `frontend.envFile` and `frontend.env` are set; otherwise run `ctg sync-env`.
 19. **`doctor --strict`**: Fails on environment drift (`--strict-env`) and stale bindings (`--strict-bindings`).
-20. **`ctg regression`**: Local execution recipe mirroring CI: `test → build → deploy --if-changed → generate → smoke`.
+20. **`ctg regression`**: Local execution recipe mirroring CI: `pnpm test → build → deploy --if-changed → generate → smoke` (the test step runs `pnpm test` even in npm projects; skip it with `--skip-test`).
 21. **Alias resolution**: Method arguments accept `${source.address}` or CLI identity aliases (length ≥ 3).
 22. **`identity export/import`**: Exports your whole Stellar config directory as a **base64 tarball — not encrypted**. Treat the output as key material for `CAATINGA_CI_STELLAR_CONFIG_B64`. Prior to 3.9.2, the archive was also left behind, world-readable, in `os.tmpdir()`; if `identity export`/`import` ever ran on a machine before upgrading, check for and delete `/tmp/caatinga-stellar-*.tar.gz` and rotate any exposed keys. See [CLI Identity Reference](/docs/cli/identity).
 23. **Config graph validation**: `${contracts.*.contractId}` placeholders in `deployArgs` must be declared in `dependsOn`; validated at config load time.
@@ -45,3 +45,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 32. **Rust 1.91.1+, never 1.91.0**: `stellar contract build` refuses exactly **1.91.0** (and the 1.81–1.83 lines) with `use a rust version other than 1.81, 1.82, 1.83 or 1.91.0`. As of 3.10.2, `ctg doctor` fails the Rust check for these and for anything older than 1.91.1. Run `rustup update stable`.
 33. **Source identity is required on mainnet**: `deploy`, `invoke` and `upgrade` always require `--source`. As of 3.10.3, `ctg read` and `ctg smoke` also refuse the built-in `alice` fallback on mainnet: pass `--source <alias>` or set `CAATINGA_SOURCE`, otherwise they fail with `CAATINGA_SOURCE_ACCOUNT_REQUIRED`.
 34. **Mainnet uses your `rpcUrl`, not the Stellar CLI's `mainnet` entry**: The Stellar CLI's built-in `mainnet` network has no RPC URL ("Bring Your Own"). Caatinga 3.10.3+ always passes the configured `rpcUrl` and `networkPassphrase` explicitly on mainnet. On 3.10.2 or earlier, mainnet commands fail with `Invalid URL Bring Your Own: …`; upgrade instead of adding a local `stellar network add mainnet`.
+35. **`postDeployRead`-only configs are wired**: As of 3.12.0, `ctg wire` and full-graph `ctg deploy` run hooks when only `postDeployRead` is configured. Earlier versions printed "No postDeploy hooks configured" and ran nothing.
+36. **New projects start on artifacts schema v2**: As of 3.12.0, `ctg init` and `ctg zk init` always write `version: 2`. Existing v1 files are read as-is; `ctg migrate artifacts` upgrades them.
+37. **`ctg status` is local, `ctg inspect` is on-chain**: `status` reads artifacts and binding markers only (no RPC). Use `ctg inspect <contract> --network <net>` to check that a recorded contract is reachable.
+38. **Reads do not need a wallet**: As of 3.12.0, `client.read()` / `simulate()` work for visitors without a wallet; only `invoke()` requires one.
