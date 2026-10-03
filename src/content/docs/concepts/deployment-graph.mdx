@@ -17,18 +17,33 @@ Dependencies are declared in `caatinga.config.ts` using the `dependsOn` property
 
 ```typescript
 export default defineConfig({
-  project: { name: "defi-dapp" },
+  project: "defi-dapp",
+  defaultNetwork: "testnet",
   contracts: {
     token: {
-      path: "contracts/token",
+      path: "./contracts/token",
+      wasm: "./contracts/token/target/wasm32v1-none/release/token.wasm",
     },
     vault: {
-      path: "contracts/vault",
+      path: "./contracts/vault",
+      wasm: "./contracts/vault/target/wasm32v1-none/release/vault.wasm",
       dependsOn: ["token"],
+      deployArgs: { token: "${contracts.token.contractId}" },
     },
     market: {
-      path: "contracts/market",
+      path: "./contracts/market",
+      wasm: "./contracts/market/target/wasm32v1-none/release/market.wasm",
       dependsOn: ["token", "vault"],
+      deployArgs: {
+        token: "${contracts.token.contractId}",
+        vault: "${contracts.vault.contractId}",
+      },
+    },
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
     },
   },
 });
@@ -47,7 +62,7 @@ token
 ```
 
 1. **`token`** has 0 dependencies → Deployed first. Its Contract ID is recorded.
-2. **`vault`** depends on `token` → Deployed second. Caatinga injects `token`'s deployed Contract ID into `vault`'s initialization parameters.
+2. **`vault`** depends on `token` → Deployed second. Caatinga resolves the `${contracts.token.contractId}` placeholder in `vault`'s `deployArgs` from the artifacts. A placeholder must reference a contract listed in `dependsOn`; this is validated when the config loads.
 3. **`market`** depends on `token` and `vault` → Deployed third once both prerequisites are confirmed on-chain.
 
 ## Cycle Validation
