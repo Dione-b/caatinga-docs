@@ -554,11 +554,18 @@ Developing smart contracts on Stellar Soroban involves multiple steps:
 5. Generating type-safe TypeScript bindings for web applications.
 6. Invoking and testing contract functions on-chain.
 
-Without an orchestrator, developers often write custom scripts or manually copy contract IDs into `.env` files. Caatinga automates this entire pipeline into a single declarative workflow:
+Without an orchestrator, developers often write custom scripts or manually copy contract IDs into `.env` files. Caatinga replaces those scripts with a single declarative workflow — in the project you already have, or in a new one.
+
+## Two ways to start
+
+- **You already have contracts** (the common case): install `@caatinga/cli`, describe your Cargo workspace, deploy graph, and frontend in `caatinga.config.ts`, and keep your code where it is. See [Add to an Existing Project](/docs/getting-started/existing-project).
+- **Starting from scratch**: `npx ctg init my-dapp` scaffolds a React + Vite dApp with a sample contract (or `--minimal` for contracts only). See [Setup & Initial Workflow](/docs/getting-started/setup).
+
+Either way, the workflow is the same:
 
 
-  #### Step: Initialize Project
-    Run `npx ctg init my-dapp` to scaffold a project with `caatinga.config.ts`.
+  #### Step: Configure
+    Describe contracts, dependencies, networks, and the frontend in `caatinga.config.ts` (generated for you by `ctg init`).
   
   #### Step: Build Contracts
     Compile Rust contracts using `npx ctg build`.
@@ -733,6 +740,212 @@ Run it inside a project: before `ctg init`, the config and artifacts checks fail
 
 ---
 
+## Section: Add to an Existing Project
+
+Path: /docs/getting-started/existing-project
+Description: Adopt Caatinga in a Soroban project you already have — keep your contracts, Cargo workspace, and frontend.
+
+# Add Caatinga to an Existing Project
+
+Caatinga is not a template generator. `ctg init` is one way to start, but most projects already have
+Rust contracts, a Cargo workspace, a frontend, and a deploy script that copies contract IDs into
+`.env` by hand. Caatinga replaces that script — your code stays where it is.
+
+You add two files at the project root:
+
+- **`caatinga.config.ts`** — what to build, the deploy graph, networks, and where the frontend lives.
+- **`caatinga.artifacts.json`** — the deployed state per network, written by Caatinga from then on.
+
+Nothing is copied into your repository except generated bindings and the env file you point it at.
+
+> **Note (note)**: 
+  This guide was run end to end on testnet with `@caatinga/cli` 3.12.0 against a two-contract Cargo
+  workspace. The [stellar-album](https://github.com/wmendes/stellar-album-2026) dApp adopted Caatinga
+  the same way: seven contracts, its own React frontend, and its `bootstrap.sh` reduced to a single
+  `caatinga deploy`.
+
+
+## Starting point
+
+A typical Soroban project before Caatinga:
+
+```text
+my-dapp/
+├── Cargo.toml              # [workspace] members = ["contracts/*"]
+├── contracts/
+│   ├── token/
+│   └── vault/              # constructor takes the token contract address
+├── frontend/               # your app (Vite, Next.js, …)
+└── deploy.sh               # stellar contract deploy … && echo "VITE_TOKEN_ID=…" > frontend/.env.local
+```
+
+## Step 1: Install the CLI
+
+From the project root (add a root `package.json` with `npm init -y` if you don't have one):
+
+```bash
+npm install -D @caatinga/cli @caatinga/core @stellar/stellar-sdk@^16.0.1
+```
+
+- `@caatinga/core` provides `defineConfig` for the config file.
+- `@stellar/stellar-sdk` pins the SDK used by `ctg generate`. Without it, generation runs whatever
+  `npx` resolves (currently 17.x, outside the tested 16.x line).
+
+## Step 2: Write `caatinga.config.ts`
+
+Describe what you already have. Paths are relative to the project root.
+
+```ts
+import { defineConfig } from "@caatinga/core";
+
+export default defineConfig({
+  project: "my-dapp",
+  defaultNetwork: "testnet",
+  // Your Cargo workspace root: one `stellar contract build` builds every member.
+  buildRoot: ".",
+  contracts: {
+    token: {
+      path: "./contracts/token",
+      wasm: "./target/wasm32v1-none/release/token.wasm",
+    },
+    vault: {
+      path: "./contracts/vault",
+      wasm: "./target/wasm32v1-none/release/vault.wasm",
+      dependsOn: ["token"],
+      // Constructor args; the placeholder is resolved from the artifacts after `token` deploys.
+      deployArgs: { token: "${contracts.token.contractId}" },
+    },
+  },
+  networks: {
+    testnet: {
+      rpcUrl: "https://soroban-testnet.stellar.org",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    },
+  },
+  frontend: {
+    bindingsOutput: "./frontend/src/contracts",
+    envFile: "./frontend/.env.local",
+    // source → env var name
+    env: {
+      token: "VITE_TOKEN_ID",
+      vault: "VITE_VAULT_ID",
+      network: "VITE_NETWORK",
+    },
+  },
+});
+```
+
+What maps to what:
+
+| Your existing setup | In `caatinga.config.ts` |
+| :--- | :--- |
+| Cargo workspace root | `buildRoot: "."` (omit it to build each contract crate on its own) |
+| A contract's WASM output | `contracts.<name>.wasm` (under `target/wasm32v1-none/release/`) |
+| Deploy order and constructor args | `dependsOn` + `deployArgs` with `${contracts.<name>.contractId}` or `${source.address}` |
+| Admin calls after deploy (`set_minter`, …) | `postDeploy` hooks, run by `ctg wire` |
+| IDs copied into `.env` | `frontend.envFile` + `frontend.env` (`<contract>`, `<contract>.wasmHash`, `network`, `rpcUrl`, `networkPassphrase`) |
+
+`frontend.framework` defaults to `"vite-react"` (the only accepted value), so you can omit it.
+Nothing requires your app to use React, Vite, or `@caatinga/client`: bindings and the env file are
+plain files any frontend can import.
+
+## Step 3: Create the artifacts file
+
+No command creates `caatinga.artifacts.json` in an existing directory (`ctg init` scaffolds a new
+project instead), and without it `ctg doctor` reports `Status: blocked` and `ctg deploy` fails with
+`CAATINGA_ARTIFACT_NOT_FOUND`. Create it once with an empty network map — this is the same file
+`ctg init --minimal` writes:
+
+```bash
+echo '{ "project": "my-dapp", "version": 2, "networks": {} }' > caatinga.artifacts.json
+```
+
+From here on, Caatinga owns this file: don't edit it by hand, and commit it.
+
+> **Note (note)**: 
+  `ctg doctor` still suggests `npx ctg init` when the artifacts file is missing. In an existing
+  project, create the file as above instead.
+
+
+## Step 4: Verify and build
+
+```bash
+npx ctg doctor
+npx ctg build
+```
+
+With `buildRoot` set, `ctg build` runs a single `stellar contract build` from the workspace root and
+then checks each configured `wasm` path. Doctor makes no RPC calls; pass `--source <alias>` to also
+check that the identity exists in your Stellar CLI keystore.
+
+## Step 5: Deploy the graph
+
+```bash
+npx ctg deploy --network testnet --source alice
+```
+
+Caatinga deploys in dependency order (`token`, then `vault` with the resolved token ID), records
+both in `caatinga.artifacts.json`, generates bindings into `frontend/src/contracts/<name>/`, runs
+`postDeploy` hooks, and writes the env file:
+
+```text
+VITE_TOKEN_ID=CDW7…6K2M
+VITE_VAULT_ID=CCBL…E3V6
+VITE_NETWORK=testnet
+```
+
+Then confirm the state:
+
+```bash
+npx ctg status --network testnet          # local artifacts + binding freshness
+npx ctg read vault.token --network testnet # on-chain read: returns the token contract ID
+npx ctg inspect vault --network testnet    # On-chain: reachable, Local WASM: matches artifact
+```
+
+> **Note (warning)**: 
+  Generating bindings adds `buffer` (a browser polyfill the bindings need) to the nearest
+  `package.json` above `bindingsOutput` — here `frontend/package.json`. Review that diff before
+  committing.
+
+
+## Step 6: Retire the old script
+
+Replace the hand-written deploy script with Caatinga commands, for example in `package.json`:
+
+```json
+{
+  "scripts": {
+    "contracts:build": "ctg build",
+    "contracts:deploy": "ctg deploy --network testnet --source alice",
+    "contracts:status": "ctg status --network testnet"
+  }
+}
+```
+
+stellar-album kept its `bootstrap.sh` only as a deprecation shim that execs `caatinga deploy`.
+
+Commit `caatinga.config.ts`, `caatinga.artifacts.json`, and the generated bindings. Whether to commit
+the env file is up to you — `ctg sync-env --network <name>` rewrites it from the artifacts at any
+time, keeping unrelated variables.
+
+## Contracts already deployed?
+
+Caatinga does not import contract IDs deployed by other tools: there is no command to adopt an
+existing deployment, and the artifacts file should not be edited by hand. On testnet, the simplest
+path is a fresh `ctg deploy` that Caatinga tracks from then on. For mainnet contracts you need to
+keep, plan the switch deliberately — future upgrades and redeploys are recorded in
+`caatinga.artifacts.json` history only for deployments Caatinga made.
+
+## Next steps
+
+- [CLI Overview](/docs/cli/overview) — every command and flag.
+- [Deployment Graph](/docs/concepts/deployment-graph) — `dependsOn` and placeholders.
+- [Upgrade Strategies](/docs/concepts/upgrades) — in-place `ctg upgrade` vs `ctg deploy --upgrade`.
+- [Client API](/docs/client/caatinga-client) — optional: `@caatinga/client` reads contract IDs from the artifacts directly.
+
+
+---
+
 ## Section: Setup & Initial Workflow
 
 Path: /docs/getting-started/setup
@@ -740,7 +953,7 @@ Description: Quick walkthrough of initializing, building, deploying, and invokin
 
 # Setup & Initial Workflow
 
-This step-by-step guide walks you through the complete lifecycle of a Soroban project with Caatinga.
+This step-by-step guide walks you through the complete lifecycle of a **new** Soroban project scaffolded by Caatinga. Already have contracts? See [Add to an Existing Project](/docs/getting-started/existing-project) instead.
 
 ## Step 1: Scaffold Project
 
@@ -1040,7 +1253,7 @@ A curated list of critical rules, boundaries, and gotchas to keep in mind when w
 15. **`buildFeatures`**: Cargo features passed directly to `stellar contract build`. Combine with `--no-default-features` to override defaults.
 16. **`postDeploy` source override**: Per-hook `source` is validated via `assertSafeSourceAccount` (rejects `S...`, `G...`, seed phrases).
 17. **`postDeploy` expect**: Verified with the [Expect DSL](/docs/configuration/expect-dsl): a plain string or `{ matcher, value? }` with `equals`, `reachable`, `isNull`, `isArray`, `minLength`, `maxLength`, `contains`, `matches`, `jsonEquals`.
-18. **`frontend.env` sources**: Each value is a contract name (its `contractId`), `<contract>.wasmHash`, or one of `network`, `rpcUrl`, `networkPassphrase`. Env sync runs automatically only on a full-graph deploy when both `frontend.envFile` and `frontend.env` are set; otherwise run `ctg sync-env`.
+18. **`frontend.env` maps source → env var name**: Each key is a contract name (its `contractId`), `<contract>.wasmHash`, or one of `network`, `rpcUrl`, `networkPassphrase`; each value is the env var to write (e.g. `{ token: "VITE_TOKEN_ID" }`). Env sync runs automatically only on a full-graph deploy when both `frontend.envFile` and `frontend.env` are set; otherwise run `ctg sync-env`.
 19. **`doctor --strict`**: Fails on environment drift (`--strict-env`) and stale bindings (`--strict-bindings`).
 20. **`ctg regression`**: Local execution recipe mirroring CI: `pnpm test → build → deploy --if-changed → generate → smoke` (the test step runs `pnpm test` even in npm projects; skip it with `--skip-test`).
 21. **Alias resolution**: Method arguments accept `${source.address}` or CLI identity aliases (length ≥ 3).
