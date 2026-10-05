@@ -106,6 +106,58 @@ When a command fails, Caatinga returns a structured error payload containing the
 
 ---
 
+### `CAATINGA_ZK_DEV_CEREMONY_BLOCKED`
+- **Category**: ZK / Mainnet guardrail
+- **Description**: A ZK operation was blocked on mainnet because the circuit artifacts come from a single-party development ceremony.
+- **Common Causes**: `ctg zk build`, `ctg deploy <verifier>` or `ctg zk invoke` found `.artifacts/zk/<circuit>/ceremony.json` with `type: dev-single-party` while targeting mainnet (detected by name or by passphrase).
+- **How to Fix**: Use testnet for dev work and audited MPC ceremony artifacts for production. `--allow-dev-ceremony` overrides the block for conscious testing only. See [ZK production guardrails](/docs/zk/overview#production-guardrails).
+
+---
+
+### `CAATINGA_ZK_VERIFICATION_FAILED`
+- **Category**: ZK
+- **Description**: On-chain proof verification returned `false`.
+- **Common Causes**: The proof does not match the verification key or the public signals — usually stale artifacts after a circuit change, or wrong inputs.
+- **How to Fix**: Re-run `ctg zk build` if the circuit changed, then `ctg zk prove`, and check `.artifacts/zk/<circuit>/public.json` holds the expected public signals.
+
+---
+
+### `CAATINGA_ZK_INVOKE_FAILED`
+- **Category**: ZK
+- **Description**: The verifier invocation was rejected or returned an invocation error.
+- **Common Causes**: Verifier not deployed on the target network, wrong `verifierContract`, or malformed proof arguments.
+- **How to Fix**: Confirm the verifier is deployed (`caatinga.artifacts.json`) and that `zk.circuits.<name>.verifierContract` points to it, then retry with fresh proof artifacts.
+
+---
+
+### `CAATINGA_ZK_VK_REQUIRED`
+- **Category**: ZK
+- **Description**: A ZK operation needs a verification key that was not provided.
+- **Common Causes**: Running `ctg zk prove` or `ctg zk invoke` before `ctg zk build`, or a deleted `.artifacts/zk/<circuit>/` directory.
+- **How to Fix**: Run `ctg zk build <circuit>` to regenerate `verification_key.json`.
+
+---
+
+### `CAATINGA_ZK_DOWNLOAD_FAILED`
+- **Category**: ZK / Toolchain
+- **Description**: Circom, snarkjs or the dev powers-of-tau could not be downloaded.
+- **Common Causes**: No network access, a proxy blocking GitHub, or the artifact host being unavailable.
+- **How to Fix**: Check connectivity and re-run `ctg zk build`. Tools are cached in `~/.caatinga/zk-tools` once downloaded.
+
+---
+
+### `CAATINGA_ZK_UNSUPPORTED_PLATFORM`
+- **Category**: ZK / Toolchain
+- **Description**: No supported ZK tool build exists for the current OS or architecture.
+- **Common Causes**: Running on a platform without a pinned Circom release binary.
+- **How to Fix**: Run the ZK workflow on a supported platform (e.g. in CI or a Linux container).
+
+<Callout type="note">
+  The `@caatinga/zk` library throws `ZkError` with the shorter codes `ZK_DEV_CEREMONY_BLOCKED`, `ZK_VERIFY_FAILED`, `ZK_INVOKE_FAILED`, `ZK_VK_REQUIRED`, `ZK_DOWNLOAD_FAILED` and `ZK_UNSUPPORTED_PLATFORM`. The CLI maps them to the `CAATINGA_ZK_*` codes above (`ZK_VERIFY_FAILED` → `CAATINGA_ZK_VERIFICATION_FAILED`). `ZK_CHECKSUM_MISMATCH` keeps its name in both.
+</Callout>
+
+---
+
 ### `CAATINGA_ARTIFACT_NOT_FOUND`
 - **Category**: Artifacts
 - **Description**: `caatinga.artifacts.json` is missing or requested contract entry does not exist.

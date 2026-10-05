@@ -1,0 +1,124 @@
+---
+title: ZK Overview
+description: Circom Groth16 proofs on BLS12-381, verified on Soroban with the ctg zk workflow.
+sidebar:
+  order: 1
+---
+
+# Zero-Knowledge Module
+
+Caatinga ships a workflow for **Groth16** zero-knowledge proofs on the **BLS12-381** curve, verified on Soroban through the official [`groth16_verifier`](https://github.com/stellar/soroban-examples/tree/main/groth16_verifier) contract pattern. You write a Circom circuit; Caatinga compiles it, runs a trusted setup, generates proofs and calls `verify_proof` on-chain.
+
+<Callout type="warning">
+  The ZK module is **experimental**. `ctg zk *` commands are outside the v3 stability contract and may change in a minor release. `ctg zk build` runs a **single-party development ceremony** — fine for local and testnet work, never for production. See [Production guardrails](#production-guardrails).
+</Callout>
+
+## What you get
+
+| Piece | Role |
+| :--- | :--- |
+| **`ctg zk` commands** | `init`, `build`, `prove`, `invoke` — see the [CLI reference](/docs/cli/zk). |
+| **`zk-starter` template** | Multiplier circuit (`a * b = c`), Soroban verifier contract and a Vite + React UI. |
+| **`@caatinga/zk`** | Node library: proof/VK serialization, `buildCircuit`, `proveCircuit`, `invokeVerifier`. |
+| **`@caatinga/zk/browser`** | Browser-safe helpers to build `verify_proof` arguments for a client-side read. |
+| **`zk` config block** | Declares circuits in `caatinga.config.ts`. |
+
+## Curve choice
+
+| Choice | Why |
+| :--- | :--- |
+| **BLS12-381 + Groth16** | Matches the Stellar Protocol 25+ host functions and the reference `groth16_verifier`. |
+| **Not BN254** | EVM-centric; Soroban does not expose BN254 pairing host functions today. |
+
+Only `bls12381` and `groth16` are accepted by the config schema — anything else fails validation.
+
+## Requirements
+
+- **Protocol 25+** on the target network.
+- **Verifier contract**: `soroban-sdk = "27.0.6"`, Rust `1.91.1`.
+- **Circom 2 and snarkjs**: installed automatically on the first `ctg zk build` into `~/.caatinga/zk-tools`, with download and setup progress printed in the terminal (circom binary, snarkjs cache, dev powers-of-tau).
+
+Every `circom` binary — freshly downloaded or read from the cache — is checked against a pinned SHA-256 before it runs. A mismatch deletes the file and raises [`ZK_CHECKSUM_MISMATCH`](/docs/reference/errors#zk_checksum_mismatch).
+
+## Configuration
+
+`ctg zk init` writes this block for you; you only edit it to add or rename circuits.
+
+```ts
+import { defineConfig } from "@caatinga/core";
+
+export default defineConfig({
+  // ...
+  zk: {
+    circuits: {
+      main: {
+        path: "./circuits",
+        protocol: "groth16",
+        curve: "bls12381",
+        verifierContract: "verifier", // contract used by `ctg zk invoke`
+      },
+    },
+  },
+});
+```
+
+| Property | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `path` | `string` | Yes | Directory holding the circuit (`main.circom`, `input.json`). |
+| `protocol` | `"groth16"` | Yes | Only Groth16 is supported. |
+| `curve` | `"bls12381"` | Yes | Only BLS12-381 is supported. |
+| `verifierContract` | `string` | No* | Name of the verifier in `contracts`. *Optional in the schema, but `ctg zk invoke` fails with `Verifier contract not configured for circuit "<name>"` without it. |
+
+## Circuit inputs
+
+`circuits/input.json` holds **private signals only**. Do not include public outputs — for the multiplier circuit, set `a` and `b` but not `c`. snarkjs derives the public signals while proving and writes them to `.artifacts/zk/<circuit>/public.json`.
+
+Including a public output makes `ctg zk prove` fail with `CAATINGA_COMMAND_FAILED` and a snarkjs witness error in the hint, such as `Too many values for input signal c`.
+
+## Artifacts
+
+Everything generated for a circuit lands in `.artifacts/zk/<circuit>/`:
+
+| File | Produced by |
+| :--- | :--- |
+| `main_js/main.wasm` | `ctg zk build` — the witness generator, resolved automatically by `zk prove`. |
+| `verification_key.json` | `ctg zk build` |
+| `ceremony.json` | `ctg zk build` — records the ceremony type (`dev-single-party`). |
+| `proof.json`, `public.json` | `ctg zk prove` |
+| `witness.wtns` | `ctg zk prove --debug` |
+
+## Dynamic VK vs embedded VK
+
+| Mode | Status |
+| :--- | :--- |
+| **Dynamic VK** (default) | The verification key is passed as a contract argument. Works end to end and survives circuit changes. |
+| **Embedded VK** (`--embed-vk`) | **Experimental, not end to end.** `ctg zk build --embed-vk` writes `contracts/verifier/src/vk.rs`, but the `zk-starter` verifier still expects a dynamic VK, so `ctg zk invoke --embed-vk` is blocked. |
+
+Use the dynamic VK flow today.
+
+## Production guardrails
+
+`ctg zk build` always records a **single-party development ceremony**. Production needs an external MPC powers-of-tau ceremony and audited circuit artifacts. Caatinga blocks mainnet operations that would use dev artifacts:
+
+| Command | Guardrail |
+| :--- | :--- |
+| `ctg zk build` | Fails when `defaultNetwork` is mainnet. |
+| `ctg deploy <verifier>` | Fails on mainnet when dev-ceremony artifacts exist for a linked circuit. |
+| `ctg zk invoke` | Fails on mainnet when dev-ceremony artifacts exist. |
+
+Mainnet is detected by network name **or** by the public network passphrase, so renaming the network (e.g. `pubnet`) does not bypass the block. A tripped guardrail raises [`CAATINGA_ZK_DEV_CEREMONY_BLOCKED`](/docs/reference/errors#caatinga_zk_dev_ceremony_blocked). `--allow-dev-ceremony` overrides it — use it only for conscious testing, never for a real deployment.
+
+## Cost reference
+
+From the reference `groth16_verifier` budget report:
+
+- ~**41M CPU** instructions with one public signal
+- ~**+2.46M CPU** per additional public input
+- ~**294 KB** memory for the pairing
+
+Measure your own circuit shape with `env.cost_estimate().budget().print()` in contract tests.
+
+## Next steps
+
+- [ZK Tutorial](/docs/zk/tutorial) — from `ctg zk init` to an on-chain verification on testnet.
+- [CLI: `ctg zk`](/docs/cli/zk) — every subcommand and flag.

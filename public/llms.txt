@@ -2,6 +2,7 @@
 
 - [CLI Overview](/docs/cli/overview): Index of all Caatinga CLI commands and options.
 - [CLI Identity Reference](/docs/cli/identity): Stellar identity export, import, and strict security rules for --source.
+- [CLI ZK Reference](/docs/cli/zk): Reference for ctg zk init, build, prove and invoke.
 - [Client API (@caatinga/client)](/docs/client/caatinga-client): Complete reference for createCaatingaClient, wallet adapters, and React hooks.
 - [Architecture & Pipeline](/docs/concepts/architecture): High-level overview of Caatinga's architectural layers and execution pipeline.
 - [Deployment Graph](/docs/concepts/deployment-graph): How Caatinga resolves multi-contract dependencies and topological execution order.
@@ -16,3 +17,5 @@
 - [Package Reference](/docs/reference/packages): Complete package index for @caatinga/cli, @caatinga/core, @caatinga/client, and @caatinga/zk.
 - [Error Reference](/docs/reference/errors): Searchable public error code reference for CAATINGA_* machine-readable error codes.
 - [Key Gotchas & Architectural Rules](/docs/reference/gotchas): 38 essential rules, gotchas, and constraints for Caatinga projects.
+- [ZK Overview](/docs/zk/overview): Circom Groth16 proofs on BLS12-381, verified on Soroban with the ctg zk workflow.
+- [ZK Tutorial](/docs/zk/tutorial): Scaffold a ZK project, generate a Groth16 proof and verify it on Soroban testnet.
