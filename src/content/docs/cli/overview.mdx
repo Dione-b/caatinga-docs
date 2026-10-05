@@ -45,7 +45,7 @@ Run `ctg doctor` before changing deploy state or troubleshooting the environment
 | **`ctg ci run`** | CI helper: doctor → smoke, re-running the installed `ctg` | `--network`, `--source`, `--strict`, `--skip-smoke` |
 | **`ctg identity`** | Export/import Stellar CLI identity for CI | `export`, `import <archive>`, `--path` |
 | **`ctg version`** | Print the CLI version and the npm dist-tag advisory | — |
-| **`ctg zk`** | Circom Groth16 ZK proof helpers (`init`, `build`, `prove`, `invoke`) | `--allow-dev-ceremony` |
+| **[`ctg zk`](/docs/cli/zk)** | Circom Groth16 ZK proof helpers (`init`, `build`, `prove`, `invoke`) — experimental | `--source`, `--network`, `--allow-dev-ceremony`, `--embed-vk` |
 
 `-y, --yes` skips the mainnet confirmation prompt (or set `CAATINGA_ASSUME_YES=true`).
 

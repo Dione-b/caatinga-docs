@@ -10,7 +10,10 @@ export interface NavSection {
   pages: NavPage[];
 }
 
+const SECTION_LABELS: Record<string, string> = { zk: "ZK" };
+
 function humanize(slug: string): string {
+  if (SECTION_LABELS[slug]) return SECTION_LABELS[slug];
   return slug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -32,6 +35,7 @@ const SECTION_ORDER: string[] = [
   "Configuration",
   "Cli",
   "Client",
+  "ZK",
   "Reference",
 ];
 
