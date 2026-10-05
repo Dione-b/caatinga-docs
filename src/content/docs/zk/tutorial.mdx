@@ -43,8 +43,16 @@ npm install
 
 If `circuits/main.circom` or `contracts/verifier` already exist, `zk init` stops. Re-run with `--force` to overwrite them.
 
+Adding ZK to an existing project requires its dependencies: run `npm install` before `zk init`.
+
 <Callout type="warning">
-  **Adding ZK to an existing project is unreliable in 3.12.0.** Run `npm install` first — otherwise `zk init` cannot load `caatinga.config.ts` and wrongly reports `No caatinga.config.ts found`. Even then, the default (non-`--minimal`) mode copies `circuits/` but **not** `contracts/verifier`, and the config merge can produce invalid TypeScript when the last contract entry has no trailing comma (as `ctg init --minimal` writes it). Check `contracts/verifier` exists and `caatinga.config.ts` parses before continuing; otherwise add them by hand from the [config example](/docs/zk/overview#configuration).
+  **Adding ZK to an existing project is broken in 3.12.0 and earlier**; the fix ([caatinga#302](https://github.com/Dione-b/caatinga/pull/302)) ships in the next release. Until then:
+  - Without `npm install`, `zk init` reports `No caatinga.config.ts found` even though the file exists.
+  - The default (non-`--minimal`) mode copies `circuits/` but **not** `contracts/verifier`.
+  - The config merge can produce invalid TypeScript when the last contract entry has no trailing comma (as `ctg init --minimal` writes it).
+  - A project with no contracts yet (`contracts: {}`) is rejected with `CAATINGA_INVALID_CONFIG`.
+
+  After running it, check that `contracts/verifier` exists and `caatinga.config.ts` parses; otherwise add them by hand from the [config example](/docs/zk/overview#configuration).
 </Callout>
 
 ## 2. Build the verifier and the circuit

@@ -26,10 +26,10 @@ Scaffolds a ZK project, or adds ZK to the current project when `projectName` is 
 | `--minimal` | Minimal identity circuit and verifier, no template copy and no frontend. |
 | `--force` | Overwrite existing `circuits/main.circom` and `contracts/verifier`. Without it, `init` stops if they exist. |
 
-In an existing project, `zk init` needs `npm install` to have run (it loads `caatinga.config.ts`; any load failure is reported as `No caatinga.config.ts found`). It merges a `verifier` contract and a `zk` block into `caatinga.config.ts`. New artifacts files are written with schema `version: 2`. If the merge fails — for example because a `zk` block already exists — the command prints the blocks to add by hand and exits with code 1.
+In an existing project, `zk init` needs `npm install` to have run, because it loads `caatinga.config.ts`. It merges a `verifier` contract and a `zk` block into `caatinga.config.ts`. New artifacts files are written with schema `version: 2`. If the merge fails — for example because a `zk` block already exists — the command prints the blocks to add by hand and exits with code 1.
 
 <Callout type="warning">
-  Known issues in 3.12.0 when adding ZK to an existing project: the default mode does not copy `contracts/verifier`, and the config merge can produce invalid TypeScript after a contract entry without a trailing comma. Verify both after running it. See the [ZK Tutorial](/docs/zk/tutorial#1-scaffold-the-project).
+  Adding ZK to an existing project is broken in 3.12.0 and earlier: the default mode does not copy `contracts/verifier`, the config merge can produce invalid TypeScript after a contract entry without a trailing comma, a project with `contracts: {}` is rejected, and any config load failure is reported as `No caatinga.config.ts found`. The fix ([caatinga#302](https://github.com/Dione-b/caatinga/pull/302)) ships in the next release. Details in the [ZK Tutorial](/docs/zk/tutorial#1-scaffold-the-project).
 </Callout>
 
 ```bash
